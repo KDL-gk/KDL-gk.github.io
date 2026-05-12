@@ -67,6 +67,19 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft Ya
   .stats { flex-direction: column; }
   .add-form { flex-direction: column; }
 }
+
+.platform-desc { font-size: 13px; color: #6b7280; margin-bottom: 16px; line-height: 1.6; }
+.storage-form { margin-top: 8px; }
+.storage-current { background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px 16px; margin-bottom: 16px; }
+.storage-current label { font-size: 12px; color: #6b7280; display: block; margin-bottom: 4px; }
+.storage-value { font-size: 14px; color: #1e3a8a; font-weight: 500; word-break: break-all; }
+.storage-edit-area { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; }
+.storage-edit-area .form-group label { font-size: 12px; color: #6b7280; margin-bottom: 4px; display: block; }
+.storage-history-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; margin-bottom: 6px; font-size: 12px; }
+.storage-history-item .addr { color: #374151; flex: 1; word-break: break-all; }
+.storage-history-item .time { color: #9ca3af; white-space: nowrap; margin-left: 12px; }
+.storage-history-item .btn-use { padding: 2px 10px; background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; border-radius: 4px; cursor: pointer; font-size: 11px; margin-left: 8px; }
+.storage-history-item .btn-use:hover { background: #dbeafe; }
 </style>
 </head>
 <body>
@@ -145,6 +158,55 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft Ya
       <div class="btn-row">
         <button class="btn btn-primary" onclick="batchAddUsers()">批量添加</button>
         <button class="btn btn-secondary" onclick="document.getElementById('batchInput').value=''">清空</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🖥️ 平台设置</div>
+    <div class="platform-desc">配置外挂存储服务器地址，用于项目数据和图片的远程存储。支持云端服务器、本地接外网服务器或 NAS 存储。</div>
+    <div class="storage-form">
+      <div class="storage-current">
+        <label>当前存储地址</label>
+        <div class="storage-value" id="currentStorageDisplay">未配置（使用本地浏览器存储）</div>
+      </div>
+      <div class="storage-edit-area">
+        <div class="form-group" style="flex:1">
+          <label>存储类型</label>
+          <select id="storageType" onchange="toggleStorageFields()" style="width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;">
+            <option value="local">本地浏览器存储（默认）</option>
+            <option value="cloud">云端服务器</option>
+            <option value="lan">本地服务器/NAS（接外网）</option>
+          </select>
+        </div>
+        <div id="storageFields" style="display:none;margin-top:12px;">
+          <div class="form-group" style="margin-bottom:12px;">
+            <label>服务器地址</label>
+            <input type="text" id="storageAddr" placeholder="如：https://your-server.com 或 http://192.168.1.100:8080" style="width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;">
+          </div>
+          <div style="display:flex;gap:12px;">
+            <div class="form-group" style="flex:1">
+              <label>API路径（选填）</label>
+              <input type="text" id="storageApiPath" placeholder="如：/api/storage" style="width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;">
+            </div>
+            <div class="form-group" style="flex:1">
+              <label>认证密钥（选填）</label>
+              <input type="text" id="storageAuthKey" placeholder="如：Bearer xxxxxx" style="width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;">
+            </div>
+          </div>
+          <div class="form-group" style="margin-top:12px;">
+            <label>备注说明</label>
+            <input type="text" id="storageNote" placeholder="如：阿里云OSS / 公司NAS / Synology" style="width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;">
+          </div>
+        </div>
+        <div class="btn-row" style="margin-top:16px;">
+          <button class="btn btn-primary" onclick="saveStorageConfig()">💾 保存配置</button>
+          <button class="btn btn-secondary" onclick="testStorageConnection()">🔗 测试连接</button>
+        </div>
+      </div>
+      <div id="storageHistory" style="margin-top:20px;display:none;">
+        <div style="font-size:13px;font-weight:600;color:#374151;margin-bottom:8px;">📜 历史配置记录</div>
+        <div id="storageHistoryList"></div>
       </div>
     </div>
   </div>
@@ -278,6 +340,122 @@ function batchAddUsers() {
 }
 
 function esc(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
+
+// ===== Platform Storage Settings =====
+const STORAGE_CONFIG_KEY = '_survey_storage_config';
+const STORAGE_HISTORY_KEY = '_survey_storage_history';
+
+function getStorageConfig() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_CONFIG_KEY)) || null; } catch(e) { return null; }
+}
+function saveStorageConfigData(config) { localStorage.setItem(STORAGE_CONFIG_KEY, JSON.stringify(config)); }
+function getStorageHistory() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_HISTORY_KEY)) || []; } catch(e) { return []; }
+}
+function addStorageHistory(config) {
+  const history = getStorageHistory();
+  history.unshift({ ...config, savedAt: new Date().toISOString() });
+  if (history.length > 10) history.length = 10;
+  localStorage.setItem(STORAGE_HISTORY_KEY, JSON.stringify(history));
+}
+
+function renderStorageConfig() {
+  const config = getStorageConfig();
+  const display = document.getElementById('currentStorageDisplay');
+  if (config && config.type !== 'local') {
+    const typeLabel = config.type === 'cloud' ? '☁️ 云端服务器' : '🖧 本地服务器/NAS';
+    display.innerHTML = `${typeLabel}：<strong>${esc(config.addr)}</strong>${config.note ? ' (' + esc(config.note) + ')' : ''}`;
+    document.getElementById('storageType').value = config.type;
+    document.getElementById('storageAddr').value = config.addr || '';
+    document.getElementById('storageApiPath').value = config.apiPath || '';
+    document.getElementById('storageAuthKey').value = config.authKey || '';
+    document.getElementById('storageNote').value = config.note || '';
+    toggleStorageFields();
+  } else {
+    display.textContent = '未配置（使用本地浏览器存储）';
+  }
+  renderStorageHistory();
+}
+
+function toggleStorageFields() {
+  const type = document.getElementById('storageType').value;
+  document.getElementById('storageFields').style.display = type === 'local' ? 'none' : 'block';
+}
+
+function saveStorageConfig() {
+  const type = document.getElementById('storageType').value;
+  if (type === 'local') {
+    localStorage.removeItem(STORAGE_CONFIG_KEY);
+    showMsg('已切换为本地浏览器存储', 'success');
+    renderStorageConfig();
+    return;
+  }
+  const addr = document.getElementById('storageAddr').value.trim();
+  if (!addr) { showMsg('请输入服务器地址', 'error'); return; }
+  const config = {
+    type,
+    addr,
+    apiPath: document.getElementById('storageApiPath').value.trim(),
+    authKey: document.getElementById('storageAuthKey').value.trim(),
+    note: document.getElementById('storageNote').value.trim(),
+    updatedAt: new Date().toISOString()
+  };
+  saveStorageConfigData(config);
+  addStorageHistory(config);
+  showMsg('存储配置已保存：' + addr, 'success');
+  renderStorageConfig();
+}
+
+function testStorageConnection() {
+  const type = document.getElementById('storageType').value;
+  if (type === 'local') { showMsg('本地存储无需测试连接', 'success'); return; }
+  const addr = document.getElementById('storageAddr').value.trim();
+  if (!addr) { showMsg('请先输入服务器地址', 'error'); return; }
+  const apiPath = document.getElementById('storageApiPath').value.trim();
+  const authKey = document.getElementById('storageAuthKey').value.trim();
+  const url = addr.replace(/\/+$/, '') + (apiPath || '/ping');
+  showMsg('正在测试连接 ' + addr + ' ...', 'success');
+  const headers = {};
+  if (authKey) headers['Authorization'] = authKey;
+  fetch(url, { method: 'GET', headers, mode: 'cors', signal: AbortSignal.timeout(8000) })
+    .then(res => {
+      if (res.ok) showMsg('✅ 连接成功！服务器响应正常 (' + res.status + ')', 'success');
+      else showMsg('⚠️ 服务器响应异常，状态码：' + res.status, 'error');
+    })
+    .catch(err => {
+      showMsg('❌ 连接失败：' + (err.name === 'TimeoutError' ? '连接超时（8秒）' : err.message), 'error');
+    });
+}
+
+function renderStorageHistory() {
+  const history = getStorageHistory();
+  const container = document.getElementById('storageHistory');
+  const list = document.getElementById('storageHistoryList');
+  if (!history.length) { container.style.display = 'none'; return; }
+  container.style.display = 'block';
+  list.innerHTML = history.map(h => {
+    const d = new Date(h.savedAt);
+    const dateStr = d.getFullYear() + '/' + (d.getMonth()+1) + '/' + d.getDate() + ' ' + d.getHours() + ':' + String(d.getMinutes()).padStart(2,'0');
+    const typeIcon = h.type === 'cloud' ? '☁️' : '🖧';
+    return `<div class="storage-history-item">
+      <span class="addr">${typeIcon} ${esc(h.addr)}${h.note ? ' (' + esc(h.note) + ')' : ''}</span>
+      <span class="time">${dateStr}</span>
+      <button class="btn-use" onclick="applyHistoryConfig('${esc(h.addr)}','${esc(h.apiPath||'')}','${esc(h.authKey||'')}','${h.type}','${esc(h.note||'')}')">使用</button>
+    </div>`;
+  }).join('');
+}
+
+function applyHistoryConfig(addr, apiPath, authKey, type, note) {
+  document.getElementById('storageType').value = type;
+  document.getElementById('storageAddr').value = addr;
+  document.getElementById('storageApiPath').value = apiPath;
+  document.getElementById('storageAuthKey').value = authKey;
+  document.getElementById('storageNote').value = note;
+  toggleStorageFields();
+  showMsg('已填入历史配置，点击"保存配置"生效', 'success');
+}
+
+document.addEventListener('DOMContentLoaded', renderStorageConfig);
 </script>
 </body>
 </html>
