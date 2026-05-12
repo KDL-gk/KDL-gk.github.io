@@ -111,6 +111,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft Ya
     <div class="sub">开得联工勘表 | 勘测人：<span id="headerSurveyor">XXX</span></div>
   </div>
   <div class="header-right">
+    <button class="btn-logout" onclick="window.location.href='projects.html'" style="background:rgba(255,255,255,0.2)">📋 返回项目列表</button>
     <span class="user-info">👤 <span id="currentUser"></span></span>
     <button class="btn-logout" onclick="logout()">退出登录</button>
   </div>
@@ -565,6 +566,12 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft Ya
 </div>
 
 <script>
+// Get project ID from URL
+const urlParams = new URLSearchParams(window.location.search);
+const PROJECT_ID = urlParams.get('id');
+if (!PROJECT_ID) { window.location.href = 'projects.html'; }
+const STORAGE_KEY = '_survey_data_' + PROJECT_ID;
+
 // Auth guard
 (function() {
   const token = localStorage.getItem('token');
@@ -572,8 +579,17 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft Ya
   if (!token || !user) { window.location.href = 'index.html'; return; }
   try {
     const u = JSON.parse(user);
+    // Load project info
+    const projects = JSON.parse(localStorage.getItem('_survey_projects') || '[]');
+    const project = projects.find(p => p.id === PROJECT_ID);
     document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('currentUser').textContent = u.name || u.username;
+      if (project) {
+        document.getElementById('headerSchoolName').textContent = project.school;
+        document.getElementById('headerSurveyor').textContent = project.surveyor;
+        document.getElementById('projectName').value = project.name;
+        document.getElementById('surveyor').value = project.surveyor;
+      }
     });
   } catch(e) { window.location.href = 'index.html'; }
 })();
@@ -806,8 +822,12 @@ function collectFormData() {
 
 function saveData() {
   const data = collectFormData();
-  localStorage.setItem('schoolSurvey', JSON.stringify(data));
-  alert('数据已保存到本地！');
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  // Update project timestamp
+  const projects = JSON.parse(localStorage.getItem('_survey_projects') || '[]');
+  const idx = projects.findIndex(p => p.id === PROJECT_ID);
+  if (idx >= 0) { projects[idx].updatedAt = new Date().toISOString(); localStorage.setItem('_survey_projects', JSON.stringify(projects)); }
+  alert('数据已保存！');
 }
 
 function collectDynamicItems(containerId, fields) {
@@ -911,7 +931,7 @@ function exportToExcel() {
 
 // Load saved data on start
 window.addEventListener('DOMContentLoaded', () => {
-  const saved = localStorage.getItem('schoolSurvey');
+  const saved = localStorage.getItem(STORAGE_KEY);
   if (saved) {
     try {
       const data = JSON.parse(saved);

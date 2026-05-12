@@ -139,7 +139,7 @@ function handleLogin(e) {
   showMsg('登录成功，正在跳转...', 'success');
   localStorage.setItem('token', Date.now().toString());
   localStorage.setItem('user', JSON.stringify({ username: user.username, name: user.name, role: user.role }));
-  setTimeout(() => window.location.href = 'app.html', 600);
+  setTimeout(() => window.location.href = 'projects.html', 600);
 }
 
 function handleRegister(e) {
@@ -164,7 +164,7 @@ function handleRegister(e) {
   setTimeout(() => switchTab('login'), 800);
 }
 
-if (localStorage.getItem('token')) { window.location.href = 'app.html'; }
+if (localStorage.getItem('token')) { window.location.href = 'projects.html'; }
 </script>
 </body>
 </html>
