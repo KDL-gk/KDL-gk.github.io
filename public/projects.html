@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>安防工勘表 - 项目管理</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif; background: #f0f2f5; color: #333; font-size: 14px; min-height: 100vh; }
+
+.header { background: linear-gradient(135deg, #1e3a8a, #2563eb); color: #fff; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; }
+.header-left h1 { font-size: 20px; font-weight: 600; }
+.header-left .sub { font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 4px; }
+.header-right { display: flex; align-items: center; gap: 12px; }
+.header-right .user-info { font-size: 13px; color: rgba(255,255,255,0.9); }
+.btn-logout { padding: 6px 14px; background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; cursor: pointer; font-size: 13px; }
+.btn-logout:hover { background: rgba(255,255,255,0.25); }
+
+.container { max-width: 1100px; margin: 0 auto; padding: 24px; }
+
+.toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.toolbar h2 { font-size: 18px; color: #1e3a8a; }
+.btn-new { padding: 10px 24px; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+.btn-new:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,235,0.4); }
+
+.project-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+
+.project-card { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #e5e7eb; transition: all 0.2s; position: relative; overflow: hidden; }
+.project-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.1); transform: translateY(-2px); }
+.project-card .card-accent { position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #2563eb, #7c3aed); }
+.project-card .card-icon { font-size: 36px; margin-bottom: 12px; }
+.project-card .card-title { font-size: 17px; font-weight: 600; color: #1e3a8a; margin-bottom: 8px; }
+.project-card .card-info { font-size: 13px; color: #6b7280; line-height: 1.8; }
+.project-card .card-info span { color: #374151; }
+.project-card .card-actions { display: flex; gap: 10px; margin-top: 16px; padding-top: 16px; border-top: 1px solid #f3f4f6; }
+.btn-enter { flex: 1; padding: 8px 0; background: #2563eb; color: #fff; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.btn-enter:hover { background: #1d4ed8; }
+.btn-delete { padding: 8px 16px; background: #fff; color: #ef4444; border: 1px solid #fca5a5; border-radius: 6px; font-size: 13px; cursor: pointer; }
+.btn-delete:hover { background: #fef2f2; }
+
+.empty-state { text-align: center; padding: 80px 20px; color: #9ca3af; }
+.empty-state .empty-icon { font-size: 64px; margin-bottom: 16px; }
+.empty-state h3 { font-size: 18px; color: #6b7280; margin-bottom: 8px; }
+
+/* Modal */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+.modal-overlay.active { display: flex; }
+.modal { background: #fff; border-radius: 16px; padding: 32px; width: 480px; max-width: 90vw; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+.modal h3 { font-size: 18px; color: #1e3a8a; margin-bottom: 24px; text-align: center; }
+.modal .form-group { margin-bottom: 16px; }
+.modal .form-group label { display: block; font-size: 13px; color: #374151; margin-bottom: 6px; font-weight: 500; }
+.modal .form-group input { width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; outline: none; }
+.modal .form-group input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+.modal .modal-actions { display: flex; gap: 12px; margin-top: 24px; }
+.modal .btn-cancel { flex: 1; padding: 10px; background: #f3f4f6; color: #374151; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; }
+.modal .btn-cancel:hover { background: #e5e7eb; }
+.modal .btn-confirm { flex: 1; padding: 10px; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+.modal .btn-confirm:hover { box-shadow: 0 4px 12px rgba(37,99,235,0.4); }
+
+.stats-bar { display: flex; gap: 16px; margin-bottom: 24px; }
+.stat-item { background: #fff; border-radius: 10px; padding: 16px 24px; flex: 1; box-shadow: 0 1px 4px rgba(0,0,0,0.06); border: 1px solid #e5e7eb; }
+.stat-item .stat-num { font-size: 28px; font-weight: 700; color: #2563eb; }
+.stat-item .stat-label { font-size: 13px; color: #6b7280; margin-top: 4px; }
+
+@media (max-width: 768px) {
+  .project-grid { grid-template-columns: 1fr; }
+  .stats-bar { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>🏫 安防工勘表管理系统</h1>
+    <div class="sub">学校安防勘测管理平台</div>
+  </div>
+  <div class="header-right">
+    <span class="user-info">👤 <span id="currentUser"></span></span>
+    <button class="btn-logout" id="btnAdmin" style="display:none;background:rgba(255,255,255,0.2)" onclick="window.location.href='admin.html'">⚙️ 系统设置</button>
+    <button class="btn-logout" onclick="logout()">退出登录</button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="stats-bar">
+    <div class="stat-item">
+      <div class="stat-num" id="statTotal">0</div>
+      <div class="stat-label">项目总数</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" id="statRecent">0</div>
+      <div class="stat-label">近7天新增</div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <h2>📋 项目列表</h2>
+    <button class="btn-new" onclick="showModal()">➕ 新建项目</button>
+  </div>
+
+  <div id="projectList"></div>
+</div>
+
+<!-- New Project Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)hideModal()">
+  <div class="modal">
+    <h3>📝 新建工勘项目</h3>
+    <div class="form-group">
+      <label>项目名称 *</label>
+      <input type="text" id="newProjectName" placeholder="如：XX学校安防工勘">
+    </div>
+    <div class="form-group">
+      <label>学校名称 *</label>
+      <input type="text" id="newSchoolName" placeholder="如：XX市第一中学">
+    </div>
+    <div class="form-group">
+      <label>勘测人 *</label>
+      <input type="text" id="newSurveyor" placeholder="请输入勘测人姓名">
+    </div>
+    <div class="form-group">
+      <label>联系电话</label>
+      <input type="text" id="newPhone" placeholder="选填">
+    </div>
+    <div class="form-group">
+      <label>项目备注</label>
+      <input type="text" id="newRemark" placeholder="选填">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="hideModal()">取 消</button>
+      <button class="btn-confirm" onclick="createProject()">创 建</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Auth guard
+(function() {
+  const token = localStorage.getItem('token');
+  const user = localStorage.getItem('user');
+  if (!token || !user) { window.location.href = 'index.html'; return; }
+  try {
+    const u = JSON.parse(user);
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('currentUser').textContent = u.name || u.username;
+      if (u.role === 'admin') document.getElementById('btnAdmin').style.display = '';
+      renderProjects();
+    });
+  } catch(e) { window.location.href = 'index.html'; }
+})();
+
+function logout() {
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  window.location.href = 'index.html';
+}
+
+function getProjects() {
+  return JSON.parse(localStorage.getItem('_survey_projects') || '[]');
+}
+function saveProjects(list) {
+  localStorage.setItem('_survey_projects', JSON.stringify(list));
+}
+
+function showModal() { document.getElementById('modalOverlay').classList.add('active'); document.getElementById('newProjectName').focus(); }
+function hideModal() {
+  document.getElementById('modalOverlay').classList.remove('active');
+  ['newProjectName','newSchoolName','newSurveyor','newPhone','newRemark'].forEach(id => document.getElementById(id).value = '');
+}
+
+function createProject() {
+  const name = document.getElementById('newProjectName').value.trim();
+  const school = document.getElementById('newSchoolName').value.trim();
+  const surveyor = document.getElementById('newSurveyor').value.trim();
+  const phone = document.getElementById('newPhone').value.trim();
+  const remark = document.getElementById('newRemark').value.trim();
+
+  if (!name || !school || !surveyor) { alert('请填写项目名称、学校名称和勘测人'); return; }
+
+  const projects = getProjects();
+  const project = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    name, school, surveyor, phone, remark,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+  projects.unshift(project);
+  saveProjects(projects);
+  hideModal();
+  renderProjects();
+}
+
+function deleteProject(id) {
+  if (!confirm('确定删除该项目？删除后工勘数据也将清除，不可恢复！')) return;
+  const projects = getProjects().filter(p => p.id !== id);
+  saveProjects(projects);
+  localStorage.removeItem('_survey_data_' + id);
+  renderProjects();
+}
+
+function enterProject(id) {
+  window.location.href = 'app.html?id=' + id;
+}
+
+function renderProjects() {
+  const projects = getProjects();
+  const container = document.getElementById('projectList');
+
+  // Stats
+  document.getElementById('statTotal').textContent = projects.length;
+  const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  document.getElementById('statRecent').textContent = projects.filter(p => new Date(p.createdAt).getTime() > weekAgo).length;
+
+  if (projects.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">📂</div>
+        <h3>暂无项目</h3>
+        <p>点击"新建项目"开始创建第一个工勘项目</p>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = '<div class="project-grid">' + projects.map(p => {
+    const date = new Date(p.createdAt);
+    const dateStr = date.getFullYear() + '/' + (date.getMonth()+1) + '/' + date.getDate();
+    return `
+      <div class="project-card">
+        <div class="card-accent"></div>
+        <div class="card-icon">🏫</div>
+        <div class="card-title">${esc(p.name)}</div>
+        <div class="card-info">
+          学校：<span>${esc(p.school)}</span><br>
+          勘测人：<span>${esc(p.surveyor)}</span><br>
+          ${p.phone ? '电话：<span>' + esc(p.phone) + '</span><br>' : ''}
+          创建时间：<span>${dateStr}</span>
+          ${p.remark ? '<br>备注：<span>' + esc(p.remark) + '</span>' : ''}
+        </div>
+        <div class="card-actions">
+          <button class="btn-enter" onclick="enterProject('${p.id}')">📋 进入工勘表</button>
+          <button class="btn-delete" onclick="deleteProject('${p.id}')">删除</button>
+        </div>
+      </div>`;
+  }).join('') + '</div>';
+}
+
+function esc(str) {
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+</script>
+</body>
+</html>
