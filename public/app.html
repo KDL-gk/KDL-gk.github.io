@@ -339,42 +339,37 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft Ya
   <!-- ========== 事件预警 ========== -->
   <div class="tab-content" id="tab-alarm">
     <div class="section">
-      <div class="section-title">🚨 事件预警摄像机布点</div>
-      <div id="alarmList">
-        <div class="dynamic-item">
-          <div class="item-header">
-            <span class="item-title">预警点 #1</span>
-            <button class="btn btn-danger" onclick="removeItem(this)">删除</button>
-          </div>
-          <div class="form-grid">
-            <div class="form-group">
-              <label>安装位置</label>
-              <input type="text" placeholder="如：围墙东侧">
-            </div>
-            <div class="form-group">
-              <label>预警类型</label>
-              <select><option>周界入侵</option><option>人员聚集</option><option>打架斗殴</option><option>攀爬检测</option><option>烟火检测</option><option>其他</option></select>
-            </div>
-            <div class="form-group">
-              <label>摄像机类型</label>
-              <select><option>枪机</option><option>球机</option><option>半球</option><option>全景</option></select>
-            </div>
-            <div class="form-group">
-              <label>数量</label>
-              <div class="suffix"><input type="number" class="alarm-cam-count" value="0" min="0" oninput="updateSummary()"><span>台</span></div>
-            </div>
-            <div class="form-group">
-              <label>安装方式</label>
-              <select><option>壁装</option><option>吊装</option><option>立杆</option></select>
-            </div>
-            <div class="form-group">
-              <label>备注</label>
-              <input type="text" placeholder="补充说明">
-            </div>
-          </div>
-        </div>
+      <div class="track-search">
+        <span class="track-search-icon">🔍</span>
+        <input type="text" id="alarmSearchInput" placeholder="搜索位置、类型..." oninput="filterAlarmRows()">
       </div>
-      <button class="btn btn-primary btn-add" onclick="addAlarmPoint()">➕ 添加预警点</button>
+      <div class="track-tags" id="alarmTags">
+        <span class="track-tag">总计 <b id="alarmTagTotal">1</b></span>
+        <span class="track-tag">P0 <b id="alarmTagP0" style="color:#ef4444">—</b></span>
+        <span class="track-tag">枪机 <b id="alarmTagGun" style="color:#2563eb">—</b></span>
+        <span class="track-tag">半球 <b id="alarmTagDome" style="color:#2563eb">—</b></span>
+      </div>
+      <div class="track-table-wrap">
+        <table class="track-table">
+          <thead>
+            <tr>
+              <th style="width:50px">序号</th>
+              <th style="width:130px">位置</th>
+              <th style="width:90px">拍摄画面</th>
+              <th style="width:160px">预警摄像机<br><span style="font-weight:400;font-size:11px">安装位置</span></th>
+              <th style="width:120px">备注</th>
+              <th style="width:80px">优先级</th>
+              <th style="width:90px">类型</th>
+              <th style="width:90px">焦距</th>
+              <th style="width:50px">操作</th>
+            </tr>
+          </thead>
+          <tbody id="alarmTableBody"></tbody>
+        </table>
+      </div>
+      <div class="track-add-btn" onclick="addAlarmPoint()">
+        <span>＋ 添加事件预警</span>
+      </div>
     </div>
   </div>
 
@@ -640,8 +635,7 @@ function updateSummary() {
   let trackCam = document.querySelectorAll('#trackTableBody tr').length;
   document.getElementById('sumTrackCam').textContent = trackCam;
 
-  let alarmCam = 0;
-  document.querySelectorAll('.alarm-cam-count').forEach(el => alarmCam += Number(el.value) || 0);
+  let alarmCam = document.querySelectorAll('#alarmTableBody tr').length;
   document.getElementById('sumAlarmCam').textContent = alarmCam;
 
   let addCam = 0;
@@ -750,21 +744,53 @@ function filterTrackRows() {
 }
 
 function addAlarmPoint() {
-  const list = document.getElementById('alarmList');
-  const n = list.children.length + 1;
-  const item = document.createElement('div');
-  item.className = 'dynamic-item';
-  item.innerHTML = `
-    <div class="item-header"><span class="item-title">预警点 #${n}</span><button class="btn btn-danger" onclick="removeItem(this)">删除</button></div>
-    <div class="form-grid">
-      <div class="form-group"><label>安装位置</label><input type="text" placeholder="如：围墙西侧"></div>
-      <div class="form-group"><label>预警类型</label><select><option>周界入侵</option><option>人员聚集</option><option>打架斗殴</option><option>攀爬检测</option><option>烟火检测</option><option>其他</option></select></div>
-      <div class="form-group"><label>摄像机类型</label><select><option>枪机</option><option>球机</option><option>半球</option><option>全景</option></select></div>
-      <div class="form-group"><label>数量</label><div class="suffix"><input type="number" class="alarm-cam-count" value="0" min="0" oninput="updateSummary()"><span>台</span></div></div>
-      <div class="form-group"><label>安装方式</label><select><option>壁装</option><option>吊装</option><option>立杆</option></select></div>
-      <div class="form-group"><label>备注</label><input type="text" placeholder="补充说明"></div>
-    </div>`;
-  list.appendChild(item);
+  const tbody = document.getElementById('alarmTableBody');
+  const n = tbody.children.length + 1;
+  const tr = document.createElement('tr');
+  tr.className = 'alarm-row';
+  tr.innerHTML = `
+    <td>${n}</td>
+    <td><select class="alarm-location"><option value="">请选择</option><option>围墙东侧</option><option>围墙西侧</option><option>围墙南侧</option><option>围墙北侧</option><option>操场</option><option>校门口</option><option>教学楼</option><option>宿舍楼</option><option>食堂</option><option>其他</option></select></td>
+    <td><div class="track-photo-btn" title="上传拍摄画面"><input type="file" accept="image/*" onchange="trackPhotoUpload(this, 'alarm-photo')">📷</div></td>
+    <td><input type="text" class="alarm-install-pos" placeholder="请输入安装位置"></td>
+    <td><input type="text" class="alarm-note" placeholder="备注"></td>
+    <td><select class="alarm-priority" onchange="updateAlarmTags()"><option>P0</option><option>P1</option><option>P2</option></select></td>
+    <td><select class="alarm-type" onchange="updateAlarmTags()"><option>枪机</option><option>球机</option><option>半球</option><option>全景</option></select></td>
+    <td><select class="alarm-focal"><option>6MM</option><option>4MM</option><option>2.8MM</option><option>8MM</option><option>12MM</option></select></td>
+    <td><button class="track-delete-btn" onclick="removeAlarmRow(this)" title="删除">✕</button></td>`;
+  tbody.appendChild(tr);
+  updateAlarmTags();
+  updateSummary();
+}
+
+function removeAlarmRow(btn) {
+  btn.closest('tr').remove();
+  document.querySelectorAll('#alarmTableBody tr').forEach((tr, i) => { tr.cells[0].textContent = i + 1; });
+  updateAlarmTags();
+  updateSummary();
+}
+
+function updateAlarmTags() {
+  const rows = document.querySelectorAll('#alarmTableBody tr');
+  let p0 = 0, gun = 0, dome = 0;
+  rows.forEach(tr => {
+    const p = tr.querySelector('.alarm-priority')?.value;
+    const t = tr.querySelector('.alarm-type')?.value;
+    if (p === 'P0') p0++;
+    if (t === '枪机') gun++;
+    if (t === '半球') dome++;
+  });
+  document.getElementById('alarmTagTotal').textContent = rows.length;
+  document.getElementById('alarmTagP0').textContent = p0 || '—';
+  document.getElementById('alarmTagGun').textContent = gun || '—';
+  document.getElementById('alarmTagDome').textContent = dome || '—';
+}
+
+function filterAlarmRows() {
+  const keyword = document.getElementById('alarmSearchInput').value.trim().toLowerCase();
+  document.querySelectorAll('#alarmTableBody tr').forEach(tr => {
+    tr.style.display = !keyword || tr.textContent.toLowerCase().includes(keyword) ? '' : 'none';
+  });
 }
 
 function addEntranceDetail() {
@@ -931,6 +957,22 @@ function collectTrackTable() {
   return rows;
 }
 
+function collectAlarmTable() {
+  const rows = [];
+  document.querySelectorAll('#alarmTableBody tr').forEach(tr => {
+    rows.push({
+      '序号': tr.cells[0]?.textContent || '',
+      '位置': tr.querySelector('.alarm-location')?.value || '',
+      '预警摄像机安装位置': tr.querySelector('.alarm-install-pos')?.value || '',
+      '备注': tr.querySelector('.alarm-note')?.value || '',
+      '优先级': tr.querySelector('.alarm-priority')?.value || '',
+      '类型': tr.querySelector('.alarm-type')?.value || '',
+      '焦距': tr.querySelector('.alarm-focal')?.value || ''
+    });
+  });
+  return rows;
+}
+
 function collectCostTable() {
   const rows = [];
   document.querySelectorAll('#costBody tr').forEach(tr => {
@@ -953,7 +995,7 @@ function exportToExcel() {
   const entrances = collectDynamicItems('entranceOverviewList');
   const dorms = collectDynamicItems('dormOverviewList');
   const tracks = collectTrackTable();
-  const alarms = collectDynamicItems('alarmList');
+  const alarms = collectAlarmTable();
   const entranceDetails = collectDynamicItems('entranceDetailList');
   const dormDetails = collectDynamicItems('dormDetailList');
   const monitors = collectDynamicItems('monitorList');
@@ -1030,6 +1072,7 @@ window.addEventListener('DOMContentLoaded', () => {
     } catch(e) {}
   }
   if (!document.querySelectorAll('#trackTableBody tr').length) addTrackPoint();
+  if (!document.querySelectorAll('#alarmTableBody tr').length) addAlarmPoint();
 });
 </script>
 </body>
