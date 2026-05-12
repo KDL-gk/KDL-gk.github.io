@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>安防工勘表 - 系统设置</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif; background: #f0f2f5; color: #333; font-size: 14px; }
+
+.header { background: linear-gradient(135deg, #1e3a8a, #2563eb); color: #fff; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; }
+.header-left h1 { font-size: 20px; font-weight: 600; }
+.header-left .sub { font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 4px; }
+.header-right { display: flex; align-items: center; gap: 12px; }
+.header-right .user-info { font-size: 13px; color: rgba(255,255,255,0.9); }
+.btn-back { padding: 6px 14px; background: rgba(255,255,255,0.2); color: #fff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; cursor: pointer; font-size: 13px; text-decoration: none; }
+.btn-back:hover { background: rgba(255,255,255,0.3); }
+
+.container { max-width: 1000px; margin: 0 auto; padding: 24px; }
+
+.section { background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.section-title { font-size: 17px; font-weight: 600; color: #1e3a8a; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+
+/* Stats */
+.stats { display: flex; gap: 16px; margin-bottom: 20px; }
+.stat-card { flex: 1; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 10px; padding: 16px; text-align: center; }
+.stat-card .num { font-size: 28px; font-weight: 700; color: #2563eb; }
+.stat-card .label { font-size: 13px; color: #6b7280; margin-top: 4px; }
+
+/* User table */
+.user-table { width: 100%; border-collapse: collapse; }
+.user-table th, .user-table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #f3f4f6; font-size: 13px; }
+.user-table th { background: #f8fafc; font-weight: 600; color: #374151; }
+.user-table tr:hover { background: #f9fafb; }
+.role-badge { padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+.role-admin { background: #dbeafe; color: #1d4ed8; }
+.role-user { background: #f3f4f6; color: #6b7280; }
+.role-select { padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px; outline: none; }
+.role-select:focus { border-color: #2563eb; }
+.btn-delete-user { padding: 4px 12px; background: #fff; color: #ef4444; border: 1px solid #fca5a5; border-radius: 6px; font-size: 12px; cursor: pointer; }
+.btn-delete-user:hover { background: #fef2f2; }
+
+/* Batch add */
+.batch-area { margin-top: 16px; }
+.batch-area textarea { width: 100%; min-height: 120px; border: 1px solid #d1d5db; border-radius: 8px; padding: 12px; font-size: 13px; font-family: monospace; outline: none; resize: vertical; }
+.batch-area textarea:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+.batch-hint { font-size: 12px; color: #9ca3af; margin-top: 6px; line-height: 1.6; }
+.btn-row { display: flex; gap: 12px; margin-top: 12px; }
+.btn { padding: 8px 20px; border-radius: 6px; border: none; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s; }
+.btn-primary { background: #2563eb; color: #fff; }
+.btn-primary:hover { background: #1d4ed8; }
+.btn-secondary { background: #f3f4f6; color: #374151; }
+.btn-secondary:hover { background: #e5e7eb; }
+
+/* Single add */
+.add-form { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; margin-top: 16px; padding-top: 16px; border-top: 1px solid #f3f4f6; }
+.add-form .form-group { display: flex; flex-direction: column; }
+.add-form .form-group label { font-size: 12px; color: #6b7280; margin-bottom: 4px; }
+.add-form .form-group input, .add-form .form-group select { padding: 6px 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px; outline: none; }
+.add-form .form-group input:focus { border-color: #2563eb; }
+
+.msg { padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; display: none; }
+.msg.error { display: block; background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; }
+.msg.success { display: block; background: #f0fdf4; color: #16a34a; border: 1px solid #86efac; }
+
+@media (max-width: 768px) {
+  .stats { flex-direction: column; }
+  .add-form { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>⚙️ 系统设置</h1>
+    <div class="sub">用户权限管理</div>
+  </div>
+  <div class="header-right">
+    <a class="btn-back" href="projects.html">📋 返回项目列表</a>
+    <span class="user-info">👤 <span id="currentUser"></span></span>
+  </div>
+</div>
+
+<div class="container">
+  <div id="msgBox" class="msg"></div>
+
+  <div class="stats">
+    <div class="stat-card"><div class="num" id="statAll">0</div><div class="label">总用户数</div></div>
+    <div class="stat-card"><div class="num" id="statAdmin">0</div><div class="label">管理员</div></div>
+    <div class="stat-card"><div class="num" id="statStaff">0</div><div class="label">实施人员</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">👥 用户列表</div>
+    <table class="user-table">
+      <thead>
+        <tr>
+          <th style="width:40px">#</th>
+          <th>用户名</th>
+          <th>姓名</th>
+          <th>角色</th>
+          <th>权限设置</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody id="userTableBody"></tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">➕ 添加人员</div>
+    <div class="add-form">
+      <div class="form-group">
+        <label>用户名</label>
+        <input type="text" id="addUsername" placeholder="登录用户名" style="width:140px">
+      </div>
+      <div class="form-group">
+        <label>姓名</label>
+        <input type="text" id="addName" placeholder="真实姓名" style="width:120px">
+      </div>
+      <div class="form-group">
+        <label>密码</label>
+        <input type="text" id="addPassword" placeholder="初始密码" value="123456" style="width:120px">
+      </div>
+      <div class="form-group">
+        <label>角色</label>
+        <select id="addRole" style="width:120px">
+          <option value="user">实施人员</option>
+          <option value="admin">管理员</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="addSingleUser()">添加</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 批量添加实施人员</div>
+    <div class="batch-area">
+      <textarea id="batchInput" placeholder="每行一个用户，格式：用户名,姓名,密码&#10;例如：&#10;zhangsan,张三,123456&#10;lisi,李四,123456&#10;wangwu,王五,123456"></textarea>
+      <div class="batch-hint">
+        格式：用户名,姓名,密码（每行一个）<br>
+        密码留空则默认为 123456，角色统一为"实施人员"
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="batchAddUsers()">批量添加</button>
+        <button class="btn btn-secondary" onclick="document.getElementById('batchInput').value=''">清空</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Auth guard - admin only
+(function() {
+  const token = localStorage.getItem('token');
+  const user = localStorage.getItem('user');
+  if (!token || !user) { window.location.href = 'index.html'; return; }
+  try {
+    const u = JSON.parse(user);
+    if (u.role !== 'admin') { window.location.href = 'projects.html'; return; }
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('currentUser').textContent = u.name || u.username;
+      renderUsers();
+    });
+  } catch(e) { window.location.href = 'index.html'; }
+})();
+
+function getUsers() {
+  const data = localStorage.getItem('_survey_users');
+  if (data) return JSON.parse(data);
+  const defaults = [{ username: 'admin', password: 'admin123', name: '管理员', role: 'admin' }];
+  localStorage.setItem('_survey_users', JSON.stringify(defaults));
+  return defaults;
+}
+function saveUsers(users) { localStorage.setItem('_survey_users', JSON.stringify(users)); }
+
+function showMsg(text, type) {
+  const el = document.getElementById('msgBox');
+  el.textContent = text;
+  el.className = 'msg ' + type;
+  setTimeout(() => el.className = 'msg', 4000);
+}
+
+function renderUsers() {
+  const users = getUsers();
+  const tbody = document.getElementById('userTableBody');
+  const currentUser = JSON.parse(localStorage.getItem('user'));
+
+  document.getElementById('statAll').textContent = users.length;
+  document.getElementById('statAdmin').textContent = users.filter(u => u.role === 'admin').length;
+  document.getElementById('statStaff').textContent = users.filter(u => u.role !== 'admin').length;
+
+  tbody.innerHTML = users.map((u, i) => {
+    const isSelf = u.username === currentUser.username;
+    const roleBadge = u.role === 'admin'
+      ? '<span class="role-badge role-admin">管理员</span>'
+      : '<span class="role-badge role-user">实施人员</span>';
+    const roleSelect = isSelf
+      ? roleBadge
+      : `<select class="role-select" onchange="changeRole('${u.username}', this.value)">
+           <option value="admin" ${u.role==='admin'?'selected':''}>管理员</option>
+           <option value="user" ${u.role!=='admin'?'selected':''}>实施人员</option>
+         </select>`;
+    const deleteBtn = isSelf
+      ? '<span style="color:#ccc;font-size:12px">当前账号</span>'
+      : `<button class="btn-delete-user" onclick="deleteUser('${u.username}')">删除</button>`;
+    return `<tr>
+      <td>${i+1}</td>
+      <td><strong>${esc(u.username)}</strong></td>
+      <td>${esc(u.name)}</td>
+      <td>${roleBadge}</td>
+      <td>${roleSelect}</td>
+      <td>${deleteBtn}</td>
+    </tr>`;
+  }).join('');
+}
+
+function changeRole(username, newRole) {
+  const users = getUsers();
+  const user = users.find(u => u.username === username);
+  if (user) { user.role = newRole; saveUsers(users); renderUsers(); showMsg(`已将 ${user.name} 设为${newRole==='admin'?'管理员':'实施人员'}`, 'success'); }
+}
+
+function deleteUser(username) {
+  if (!confirm('确定删除该用户？')) return;
+  const users = getUsers().filter(u => u.username !== username);
+  saveUsers(users);
+  renderUsers();
+  showMsg('用户已删除', 'success');
+}
+
+function addSingleUser() {
+  const username = document.getElementById('addUsername').value.trim();
+  const name = document.getElementById('addName').value.trim();
+  const password = document.getElementById('addPassword').value.trim();
+  const role = document.getElementById('addRole').value;
+
+  if (!username || !name) { showMsg('请填写用户名和姓名', 'error'); return; }
+  if (username.length < 3) { showMsg('用户名至少3个字符', 'error'); return; }
+
+  const users = getUsers();
+  if (users.find(u => u.username === username)) { showMsg('用户名已存在', 'error'); return; }
+
+  users.push({ username, password: password || '123456', name, role });
+  saveUsers(users);
+  renderUsers();
+  document.getElementById('addUsername').value = '';
+  document.getElementById('addName').value = '';
+  showMsg(`已添加用户：${name}（${role==='admin'?'管理员':'实施人员'}）`, 'success');
+}
+
+function batchAddUsers() {
+  const input = document.getElementById('batchInput').value.trim();
+  if (!input) { showMsg('请输入要添加的用户信息', 'error'); return; }
+
+  const lines = input.split('\n').map(l => l.trim()).filter(l => l);
+  const users = getUsers();
+  let added = 0, skipped = 0;
+
+  lines.forEach(line => {
+    const parts = line.split(/[,，\t]/).map(s => s.trim());
+    const username = parts[0];
+    const name = parts[1] || username;
+    const password = parts[2] || '123456';
+
+    if (!username || username.length < 3) { skipped++; return; }
+    if (users.find(u => u.username === username)) { skipped++; return; }
+
+    users.push({ username, password, name, role: 'user' });
+    added++;
+  });
+
+  saveUsers(users);
+  renderUsers();
+  document.getElementById('batchInput').value = '';
+  showMsg(`批量添加完成：成功 ${added} 人${skipped > 0 ? '，跳过 ' + skipped + ' 人（重复或格式错误）' : ''}`, added > 0 ? 'success' : 'error');
+}
+
+function esc(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
+</script>
+</body>
+</html>
