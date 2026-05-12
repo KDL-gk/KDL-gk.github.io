@@ -90,6 +90,29 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft Ya
 
 /* Bottom actions */
 .bottom-actions { display: flex; justify-content: center; gap: 16px; padding: 24px; }
+
+/* Track table redesign */
+.track-search { position: relative; margin-bottom: 16px; }
+.track-search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 16px; }
+.track-search input { width: 100%; padding: 12px 14px 12px 40px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; outline: none; }
+.track-search input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+.track-tags { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
+.track-tag { background: #fff; border: 1px solid #e5e7eb; border-radius: 20px; padding: 5px 16px; font-size: 13px; color: #374151; }
+.track-tag b { margin-left: 4px; }
+.track-table-wrap { overflow-x: auto; }
+.track-table { width: 100%; border-collapse: collapse; min-width: 1100px; }
+.track-table thead th { background: linear-gradient(135deg, #2563eb, #3b82f6); color: #fff; padding: 10px 8px; font-size: 12px; font-weight: 600; text-align: center; white-space: nowrap; }
+.track-table tbody td { padding: 8px 6px; border-bottom: 1px solid #f3f4f6; text-align: center; vertical-align: middle; font-size: 13px; }
+.track-table tbody tr:hover { background: #f9fafb; }
+.track-table select, .track-table input[type="text"] { width: 100%; padding: 5px 6px; border: 1px solid #d1d5db; border-radius: 5px; font-size: 12px; outline: none; text-align: center; }
+.track-table select:focus, .track-table input[type="text"]:focus { border-color: #2563eb; }
+.track-photo-btn { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer; position: relative; overflow: hidden; }
+.track-photo-btn input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.track-photo-btn img { width: 100%; height: 100%; object-fit: cover; border-radius: 5px; }
+.track-delete-btn { background: none; border: none; color: #ef4444; cursor: pointer; font-size: 16px; padding: 4px; }
+.track-delete-btn:hover { background: #fef2f2; border-radius: 4px; }
+.track-add-btn { border: 2px dashed #93c5fd; border-radius: 10px; padding: 20px; text-align: center; cursor: pointer; color: #2563eb; font-size: 14px; font-weight: 500; margin-top: 16px; transition: all 0.2s; }
+.track-add-btn:hover { background: #eff6ff; border-color: #2563eb; }
 .btn-lg { padding: 10px 32px; font-size: 15px; border-radius: 8px; }
 .btn-export { background: #10b981; color: #fff; border: none; }
 .btn-export:hover { background: #059669; }
@@ -275,51 +298,41 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft Ya
   <!-- ========== 人员轨迹 ========== -->
   <div class="tab-content" id="tab-track">
     <div class="section">
-      <div class="section-title">👣 人员轨迹摄像机布点</div>
-      <div id="trackList">
-        <div class="dynamic-item">
-          <div class="item-header">
-            <span class="item-title">轨迹点 #1</span>
-            <button class="btn btn-danger" onclick="removeItem(this)">删除</button>
-          </div>
-          <div class="form-grid">
-            <div class="form-group">
-              <label>安装位置</label>
-              <input type="text" placeholder="如：教学楼A栋走廊">
-            </div>
-            <div class="form-group">
-              <label>摄像机类型</label>
-              <select><option>枪机</option><option>球机</option><option>半球</option><option>全景</option></select>
-            </div>
-            <div class="form-group">
-              <label>数量</label>
-              <div class="suffix"><input type="number" class="track-cam-count" value="1" min="1" oninput="updateSummary()"><span>台</span></div>
-            </div>
-            <div class="form-group">
-              <label>安装方式</label>
-              <select><option>壁装</option><option>吊装</option><option>立杆</option></select>
-            </div>
-            <div class="form-group">
-              <label>供电方式</label>
-              <select><option>POE</option><option>DC12V</option><option>AC220V</option></select>
-            </div>
-            <div class="form-group">
-              <label>备注</label>
-              <input type="text" placeholder="补充说明">
-            </div>
-          </div>
-        </div>
+      <div class="track-search">
+        <span class="track-search-icon">🔍</span>
+        <input type="text" id="trackSearchInput" placeholder="搜索位置、类型..." oninput="filterTrackRows()">
       </div>
-      <button class="btn btn-primary btn-add" onclick="addTrackPoint()">➕ 添加轨迹点</button>
-    </div>
-    <div class="section">
-      <div class="section-title">📸 现场照片</div>
-      <div class="upload-area">
-        <input type="file" accept="image/*" multiple onchange="handleUpload(this, 'trackPhotoPreview', 10)">
-        <div class="icon-upload">📷</div>
-        <div>拍摄/上传图片</div>
+      <div class="track-tags" id="trackTags">
+        <span class="track-tag">总计 <b id="tagTotal">1</b></span>
+        <span class="track-tag">P0 <b id="tagP0" style="color:#ef4444">—</b></span>
+        <span class="track-tag">P1 <b id="tagP1" style="color:#f59e0b">—</b></span>
+        <span class="track-tag">枪机 <b id="tagGun" style="color:#2563eb">—</b></span>
+        <span class="track-tag">半球 <b id="tagDome" style="color:#2563eb">—</b></span>
       </div>
-      <div class="preview-container" id="trackPhotoPreview"></div>
+      <div class="track-table-wrap">
+        <table class="track-table">
+          <thead>
+            <tr>
+              <th style="width:50px">序号</th>
+              <th style="width:110px">位置</th>
+              <th style="width:90px">拍摄画面</th>
+              <th style="width:130px">方案一<br><span style="font-weight:400;font-size:11px">（利旧为主）</span></th>
+              <th style="width:90px">方案一备注</th>
+              <th style="width:130px">方案二<br><span style="font-weight:400;font-size:11px">（新增为主）</span></th>
+              <th style="width:90px">方案二备注</th>
+              <th style="width:100px">选点原因</th>
+              <th style="width:70px">优先级</th>
+              <th style="width:80px">类型</th>
+              <th style="width:80px">焦距</th>
+              <th style="width:50px">操作</th>
+            </tr>
+          </thead>
+          <tbody id="trackTableBody"></tbody>
+        </table>
+      </div>
+      <div class="track-add-btn" onclick="addTrackPoint()">
+        <span>＋ 添加摄像机</span>
+      </div>
     </div>
   </div>
 
@@ -624,8 +637,7 @@ function updateSummary() {
   document.getElementById('sumStudents').textContent = students;
   document.getElementById('sumStaff').textContent = staff;
 
-  let trackCam = 0;
-  document.querySelectorAll('.track-cam-count').forEach(el => trackCam += Number(el.value) || 0);
+  let trackCam = document.querySelectorAll('#trackTableBody tr').length;
   document.getElementById('sumTrackCam').textContent = trackCam;
 
   let alarmCam = 0;
@@ -664,21 +676,77 @@ function addEntrance() {
 }
 
 function addTrackPoint() {
-  const list = document.getElementById('trackList');
-  const n = list.children.length + 1;
-  const item = document.createElement('div');
-  item.className = 'dynamic-item';
-  item.innerHTML = `
-    <div class="item-header"><span class="item-title">轨迹点 #${n}</span><button class="btn btn-danger" onclick="removeItem(this)">删除</button></div>
-    <div class="form-grid">
-      <div class="form-group"><label>安装位置</label><input type="text" placeholder="如：教学楼B栋走廊"></div>
-      <div class="form-group"><label>摄像机类型</label><select><option>枪机</option><option>球机</option><option>半球</option><option>全景</option></select></div>
-      <div class="form-group"><label>数量</label><div class="suffix"><input type="number" class="track-cam-count" value="1" min="1" oninput="updateSummary()"><span>台</span></div></div>
-      <div class="form-group"><label>安装方式</label><select><option>壁装</option><option>吊装</option><option>立杆</option></select></div>
-      <div class="form-group"><label>供电方式</label><select><option>POE</option><option>DC12V</option><option>AC220V</option></select></div>
-      <div class="form-group"><label>备注</label><input type="text" placeholder="补充说明"></div>
-    </div>`;
-  list.appendChild(item);
+  const tbody = document.getElementById('trackTableBody');
+  const n = tbody.children.length + 1;
+  const tr = document.createElement('tr');
+  tr.className = 'track-row';
+  tr.innerHTML = `
+    <td>${n}</td>
+    <td><select class="track-location"><option value="">请选择</option><option>教学楼走廊</option><option>操场</option><option>校门口</option><option>食堂</option><option>图书馆</option><option>实验楼</option><option>行政楼</option><option>停车场</option><option>围墙</option><option>其他</option></select></td>
+    <td><div class="track-photo-btn" title="上传拍摄画面"><input type="file" accept="image/*" onchange="trackPhotoUpload(this, 'photo1')">📷</div></td>
+    <td><select class="track-scheme1"><option value="">请选择</option><option>利旧-调整角度</option><option>利旧-更换镜头</option><option>利旧-原位保留</option><option>利旧-移机</option><option>新增</option></select></td>
+    <td><input type="text" class="track-note1" placeholder="备注"></td>
+    <td><div class="track-photo-btn" title="方案二拍摄"><input type="file" accept="image/*" onchange="trackPhotoUpload(this, 'photo2')">📷</div></td>
+    <td><input type="text" class="track-note2" placeholder="备注"></td>
+    <td><select class="track-reason"><option value="">请选择</option><option>轨迹覆盖</option><option>重点区域</option><option>盲区补充</option><option>安全要求</option><option>客户要求</option></select></td>
+    <td><select class="track-priority" onchange="updateTrackTags()"><option>P0</option><option>P1</option><option>P2</option></select></td>
+    <td><select class="track-type" onchange="updateTrackTags()"><option>枪机</option><option>球机</option><option>半球</option><option>全景</option></select></td>
+    <td><select class="track-focal"><option>6MM</option><option>4MM</option><option>2.8MM</option><option>8MM</option><option>12MM</option></select></td>
+    <td><button class="track-delete-btn" onclick="removeTrackRow(this)" title="删除">✕</button></td>`;
+  tbody.appendChild(tr);
+  updateTrackTags();
+  updateSummary();
+}
+
+function removeTrackRow(btn) {
+  btn.closest('tr').remove();
+  reindexTrackRows();
+  updateTrackTags();
+  updateSummary();
+}
+
+function reindexTrackRows() {
+  document.querySelectorAll('#trackTableBody tr').forEach((tr, i) => {
+    tr.cells[0].textContent = i + 1;
+  });
+}
+
+function updateTrackTags() {
+  const rows = document.querySelectorAll('#trackTableBody tr');
+  const total = rows.length;
+  let p0 = 0, p1 = 0, gun = 0, dome = 0;
+  rows.forEach(tr => {
+    const priority = tr.querySelector('.track-priority')?.value;
+    const type = tr.querySelector('.track-type')?.value;
+    if (priority === 'P0') p0++;
+    if (priority === 'P1') p1++;
+    if (type === '枪机') gun++;
+    if (type === '半球') dome++;
+  });
+  document.getElementById('tagTotal').textContent = total;
+  document.getElementById('tagP0').textContent = p0 || '—';
+  document.getElementById('tagP1').textContent = p1 || '—';
+  document.getElementById('tagGun').textContent = gun || '—';
+  document.getElementById('tagDome').textContent = dome || '—';
+}
+
+function trackPhotoUpload(input, field) {
+  const file = input.files[0];
+  if (!file) return;
+  const btn = input.closest('.track-photo-btn');
+  const reader = new FileReader();
+  reader.onload = e => {
+    btn.innerHTML = `<img src="${e.target.result}" onclick="openLightbox(this.src)"><input type="file" accept="image/*" onchange="trackPhotoUpload(this, '${field}')">`;
+  };
+  reader.readAsDataURL(file);
+}
+
+function filterTrackRows() {
+  const keyword = document.getElementById('trackSearchInput').value.trim().toLowerCase();
+  document.querySelectorAll('#trackTableBody tr').forEach(tr => {
+    const text = tr.textContent.toLowerCase();
+    tr.style.display = !keyword || text.includes(keyword) ? '' : 'none';
+  });
 }
 
 function addAlarmPoint() {
@@ -845,6 +913,24 @@ function collectDynamicItems(containerId, fields) {
   return rows;
 }
 
+function collectTrackTable() {
+  const rows = [];
+  document.querySelectorAll('#trackTableBody tr').forEach(tr => {
+    rows.push({
+      '序号': tr.cells[0]?.textContent || '',
+      '位置': tr.querySelector('.track-location')?.value || '',
+      '方案一（利旧）': tr.querySelector('.track-scheme1')?.value || '',
+      '方案一备注': tr.querySelector('.track-note1')?.value || '',
+      '方案二备注': tr.querySelector('.track-note2')?.value || '',
+      '选点原因': tr.querySelector('.track-reason')?.value || '',
+      '优先级': tr.querySelector('.track-priority')?.value || '',
+      '类型': tr.querySelector('.track-type')?.value || '',
+      '焦距': tr.querySelector('.track-focal')?.value || ''
+    });
+  });
+  return rows;
+}
+
 function collectCostTable() {
   const rows = [];
   document.querySelectorAll('#costBody tr').forEach(tr => {
@@ -866,7 +952,7 @@ function exportToExcel() {
   const basic = collectFormData();
   const entrances = collectDynamicItems('entranceOverviewList');
   const dorms = collectDynamicItems('dormOverviewList');
-  const tracks = collectDynamicItems('trackList');
+  const tracks = collectTrackTable();
   const alarms = collectDynamicItems('alarmList');
   const entranceDetails = collectDynamicItems('entranceDetailList');
   const dormDetails = collectDynamicItems('dormDetailList');
@@ -943,6 +1029,7 @@ window.addEventListener('DOMContentLoaded', () => {
       updateSummary();
     } catch(e) {}
   }
+  if (!document.querySelectorAll('#trackTableBody tr').length) addTrackPoint();
 });
 </script>
 </body>
