@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>安防工勘表</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif; background: #f0f2f5; color: #333; font-size: 14px; }
+
+/* Header */
+.header { background: linear-gradient(135deg, #1e3a8a, #2563eb); color: #fff; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; }
+.header-left h1 { font-size: 18px; font-weight: 600; }
+.header-left .sub { font-size: 12px; color: rgba(255,255,255,0.8); margin-top: 4px; }
+.header-right { display: flex; align-items: center; gap: 12px; }
+.header-right .user-info { font-size: 13px; color: rgba(255,255,255,0.9); }
+.header-right .btn-logout { padding: 6px 14px; background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; cursor: pointer; font-size: 13px; }
+.header-right .btn-logout:hover { background: rgba(255,255,255,0.25); }
+
+/* Tabs */
+.tabs { background: #fff; border-bottom: 1px solid #e5e7eb; display: flex; padding: 0 16px; overflow-x: auto; }
+.tab { padding: 12px 16px; cursor: pointer; white-space: nowrap; font-size: 14px; color: #666; border-bottom: 2px solid transparent; transition: all 0.2s; }
+.tab:hover { color: #2563eb; }
+.tab.active { color: #2563eb; border-bottom-color: #2563eb; font-weight: 600; }
+.tab .icon { margin-right: 4px; }
+
+/* Summary bar */
+.summary-bar { display: flex; flex-wrap: wrap; gap: 8px; padding: 16px 24px; justify-content: center; }
+.summary-tag { background: #fff; border: 1px solid #d1d5db; border-radius: 16px; padding: 4px 14px; font-size: 13px; color: #333; }
+.summary-tag .val { color: #2563eb; font-weight: 600; }
+
+/* Content */
+.content { max-width: 1200px; margin: 0 auto; padding: 16px 24px 40px; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* Section card */
+.section { background: #fff; border-radius: 8px; padding: 20px 24px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.section-title { font-size: 16px; font-weight: 600; color: #1e40af; margin-bottom: 16px; display: flex; align-items: center; gap: 6px; }
+
+/* Form grid */
+.form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+.form-group { display: flex; flex-direction: column; }
+.form-group label { font-size: 13px; color: #6b7280; margin-bottom: 4px; }
+.form-group input, .form-group select, .form-group textarea {
+  border: 1px solid #d1d5db; border-radius: 6px; padding: 8px 12px; font-size: 14px; outline: none; transition: border 0.2s;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37,99,235,0.1); }
+.form-group .suffix { display: flex; align-items: center; gap: 4px; }
+.form-group .suffix input { flex: 1; }
+.form-group .suffix span { color: #6b7280; font-size: 13px; white-space: nowrap; }
+
+/* Upload area */
+.upload-area { border: 2px dashed #93c5fd; border-radius: 8px; padding: 40px; text-align: center; cursor: pointer; color: #6b7280; transition: all 0.2s; position: relative; }
+.upload-area:hover { border-color: #2563eb; background: #eff6ff; }
+.upload-area input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.upload-area .icon-upload { font-size: 32px; margin-bottom: 8px; }
+.upload-hint { font-size: 13px; color: #9ca3af; margin-top: 4px; }
+.preview-container { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; }
+.preview-item { position: relative; width: 120px; height: 90px; border-radius: 6px; overflow: hidden; border: 1px solid #e5e7eb; cursor: pointer; }
+.preview-item img { width: 100%; height: 100%; object-fit: cover; }
+.preview-item .remove { position: absolute; top: 2px; right: 2px; background: rgba(0,0,0,0.5); color: #fff; border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; font-size: 12px; line-height: 20px; text-align: center; z-index: 2; }
+
+/* Lightbox */
+.lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; }
+.lightbox.active { display: flex; }
+.lightbox img { max-width: 90vw; max-height: 90vh; border-radius: 8px; box-shadow: 0 4px 30px rgba(0,0,0,0.5); }
+.lightbox .close-btn { position: absolute; top: 20px; right: 30px; color: #fff; font-size: 36px; cursor: pointer; background: none; border: none; line-height: 1; }
+
+/* Dynamic list */
+.dynamic-list { margin-top: 12px; }
+.dynamic-item { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 12px; position: relative; }
+.dynamic-item .item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.dynamic-item .item-title { font-weight: 600; color: #374151; }
+.btn { padding: 6px 16px; border-radius: 6px; border: none; cursor: pointer; font-size: 13px; transition: all 0.2s; }
+.btn-primary { background: #2563eb; color: #fff; }
+.btn-primary:hover { background: #1d4ed8; }
+.btn-danger { background: #fff; color: #ef4444; border: 1px solid #fca5a5; }
+.btn-danger:hover { background: #fef2f2; }
+.btn-add { display: flex; align-items: center; gap: 4px; margin-top: 8px; }
+
+/* Textarea */
+.form-group textarea { min-height: 80px; resize: vertical; }
+
+/* Table for 实施费用 */
+.cost-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+.cost-table th, .cost-table td { border: 1px solid #e5e7eb; padding: 8px 12px; text-align: left; font-size: 13px; }
+.cost-table th { background: #f3f4f6; font-weight: 600; }
+.cost-table input { border: none; width: 100%; outline: none; background: transparent; }
+
+/* Bottom actions */
+.bottom-actions { display: flex; justify-content: center; gap: 16px; padding: 24px; }
+.btn-lg { padding: 10px 32px; font-size: 15px; border-radius: 8px; }
+.btn-export { background: #10b981; color: #fff; border: none; }
+.btn-export:hover { background: #059669; }
+.btn-save { background: #2563eb; color: #fff; border: none; }
+.btn-save:hover { background: #1d4ed8; }
+
+@media (max-width: 768px) {
+  .form-grid { grid-template-columns: 1fr 1fr; }
+  .summary-bar { padding: 12px 16px; }
+  .content { padding: 12px 16px 40px; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>🏫 <span id="headerSchoolName">XXXX学校</span> - 安防工勘表</h1>
+    <div class="sub">开得联工勘表 | 勘测人：<span id="headerSurveyor">XXX</span></div>
+  </div>
+  <div class="header-right">
+    <span class="user-info">👤 <span id="currentUser"></span></span>
+    <button class="btn-logout" onclick="logout()">退出登录</button>
+  </div>
+</div>
+
+<div class="tabs" id="tabBar">
+  <div class="tab active" data-tab="overview"><span class="icon">🏫</span> 学校总览</div>
+  <div class="tab" data-tab="track"><span class="icon">👣</span> 人员轨迹</div>
+  <div class="tab" data-tab="alarm"><span class="icon">🚨</span> 事件预警</div>
+  <div class="tab" data-tab="entrance"><span class="icon">🚪</span> 出入口</div>
+  <div class="tab" data-tab="dorm"><span class="icon">🏠</span> 宿管</div>
+  <div class="tab" data-tab="monitor"><span class="icon">➕</span> 监控增加</div>
+  <div class="tab" data-tab="cost"><span class="icon">🔥</span> 实施费用参考</div>
+</div>
+
+<div class="summary-bar" id="summaryBar">
+  <span class="summary-tag">全校总人数 <span class="val" id="sumTotal">0</span></span>
+  <span class="summary-tag">学生人数 <span class="val" id="sumStudents">0</span></span>
+  <span class="summary-tag">教职工 <span class="val" id="sumStaff">0</span></span>
+  <span class="summary-tag">人员轨迹摄像机 <span class="val" id="sumTrackCam">0</span></span>
+  <span class="summary-tag">事件预警摄像机 <span class="val" id="sumAlarmCam">0</span></span>
+  <span class="summary-tag">监控增加摄像机 <span class="val" id="sumAddCam">0</span></span>
+  <span class="summary-tag">宿管摄像机 <span class="val" id="sumDormCam">0</span></span>
+  <span class="summary-tag">总计摄像机 <span class="val" id="sumTotalCam">0</span></span>
+</div>
+
+<div class="content">
+  <!-- ========== 学校总览 ========== -->
+  <div class="tab-content active" id="tab-overview">
+    <div class="section">
+      <div class="section-title">📍 项目基本信息</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>项目名称</label>
+          <input type="text" id="projectName" placeholder="XXXX学校——工勘" oninput="updateHeader()">
+        </div>
+        <div class="form-group">
+          <label>勘测人</label>
+          <input type="text" id="surveyor" placeholder="请输入勘测人" oninput="updateHeader()">
+        </div>
+        <div class="form-group">
+          <label>全校总人数</label>
+          <div class="suffix"><input type="number" id="totalPeople" placeholder="请输入" oninput="updateSummary()"><span>人</span></div>
+        </div>
+        <div class="form-group">
+          <label>教职工人数</label>
+          <div class="suffix"><input type="number" id="staffCount" placeholder="请输入" oninput="updateSummary()"><span>人</span></div>
+        </div>
+        <div class="form-group">
+          <label>学生总人数</label>
+          <div class="suffix"><input type="number" id="studentCount" placeholder="请输入" oninput="updateSummary()"><span>人</span></div>
+        </div>
+        <div class="form-group">
+          <label>住宿生人数</label>
+          <div class="suffix"><input type="number" id="boarderCount" placeholder="请输入"><span>人</span></div>
+        </div>
+        <div class="form-group">
+          <label>班级数量</label>
+          <div class="suffix"><input type="number" id="classCount" placeholder="请输入"><span>个</span></div>
+        </div>
+        <div class="form-group">
+          <label>校门</label>
+          <input type="text" id="mainGate" placeholder="如：北门">
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">🚪 出入口总览</div>
+      <div id="entranceOverviewList">
+        <div class="dynamic-item">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>校门</label>
+              <input type="text" placeholder="如：北门">
+            </div>
+            <div class="form-group">
+              <label>是否有旧闸机</label>
+              <input type="text" placeholder="如北门新增，南门利旧">
+            </div>
+            <div class="form-group">
+              <label>是否通行电动车</label>
+              <select><option>否</option><option>是</option></select>
+            </div>
+            <div class="form-group">
+              <label>通行方式</label>
+              <input type="text" placeholder="如北门混进混出，南门混进清...">
+            </div>
+            <div class="form-group">
+              <label>认证方式</label>
+              <select><option>人脸</option><option>刷卡</option><option>人脸+刷卡</option><option>二维码</option></select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-add" onclick="addEntrance()">➕ 添加出入口</button>
+    </div>
+
+    <div class="section">
+      <div class="section-title">🏠 宿管总览</div>
+      <div id="dormOverviewList">
+        <div class="dynamic-item">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>宿舍数量</label>
+              <div class="suffix"><input type="number" placeholder="请输入"><span>栋</span></div>
+            </div>
+            <div class="form-group">
+              <label>总出入口数量</label>
+              <div class="suffix"><input type="number" placeholder="请输入"><span>个</span></div>
+            </div>
+            <div class="form-group">
+              <label>总宿管室数量</label>
+              <div class="suffix"><input type="number" placeholder="请输入"><span>个</span></div>
+            </div>
+            <div class="form-group">
+              <label>总考勤点数量</label>
+              <div class="suffix"><input type="number" placeholder="请输入"><span>个</span></div>
+            </div>
+            <div class="form-group">
+              <label>总摄像机数量</label>
+              <div class="suffix"><input type="number" id="dormCamCount" placeholder="请输入" oninput="updateSummary()"><span>个</span></div>
+            </div>
+            <div class="form-group">
+              <label>灯光情况</label>
+              <input type="text" placeholder="请输入">
+            </div>
+            <div class="form-group">
+              <label>是否有学生不经过通道</label>
+              <select><option>否</option><option>是</option></select>
+            </div>
+            <div class="form-group">
+              <label>宿舍名称</label>
+              <input type="text" placeholder="如：宿舍1">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">📸 学校门头照、导览图照片</div>
+      <p style="font-size:13px;color:#6b7280;margin-bottom:12px;">📷 点击下方按钮拍摄/上传学校门头照或导览图（最多3张）</p>
+      <div class="upload-area" id="uploadSchoolPhotos">
+        <input type="file" accept="image/*" multiple onchange="handleUpload(this, 'schoolPhotoPreview', 3)">
+        <div class="icon-upload">📷</div>
+        <div>拍摄/上传图片</div>
+        <div class="upload-hint">支持 JPG、PNG 格式</div>
+      </div>
+      <div class="preview-container" id="schoolPhotoPreview"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">📝 备注</div>
+      <div class="form-group">
+        <textarea id="overviewNotes" placeholder="输入备注信息..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== 人员轨迹 ========== -->
+  <div class="tab-content" id="tab-track">
+    <div class="section">
+      <div class="section-title">👣 人员轨迹摄像机布点</div>
+      <div id="trackList">
+        <div class="dynamic-item">
+          <div class="item-header">
+            <span class="item-title">轨迹点 #1</span>
+            <button class="btn btn-danger" onclick="removeItem(this)">删除</button>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>安装位置</label>
+              <input type="text" placeholder="如：教学楼A栋走廊">
+            </div>
+            <div class="form-group">
+              <label>摄像机类型</label>
+              <select><option>枪机</option><option>球机</option><option>半球</option><option>全景</option></select>
+            </div>
+            <div class="form-group">
+              <label>数量</label>
+              <div class="suffix"><input type="number" class="track-cam-count" value="1" min="1" oninput="updateSummary()"><span>台</span></div>
+            </div>
+            <div class="form-group">
+              <label>安装方式</label>
+              <select><option>壁装</option><option>吊装</option><option>立杆</option></select>
+            </div>
+            <div class="form-group">
+              <label>供电方式</label>
+              <select><option>POE</option><option>DC12V</option><option>AC220V</option></select>
+            </div>
+            <div class="form-group">
+              <label>备注</label>
+              <input type="text" placeholder="补充说明">
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-add" onclick="addTrackPoint()">➕ 添加轨迹点</button>
+    </div>
+    <div class="section">
+      <div class="section-title">📸 现场照片</div>
+      <div class="upload-area">
+        <input type="file" accept="image/*" multiple onchange="handleUpload(this, 'trackPhotoPreview', 10)">
+        <div class="icon-upload">📷</div>
+        <div>拍摄/上传图片</div>
+      </div>
+      <div class="preview-container" id="trackPhotoPreview"></div>
+    </div>
+  </div>
+
+  <!-- ========== 事件预警 ========== -->
+  <div class="tab-content" id="tab-alarm">
+    <div class="section">
+      <div class="section-title">🚨 事件预警摄像机布点</div>
+      <div id="alarmList">
+        <div class="dynamic-item">
+          <div class="item-header">
+            <span class="item-title">预警点 #1</span>
+            <button class="btn btn-danger" onclick="removeItem(this)">删除</button>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>安装位置</label>
+              <input type="text" placeholder="如：围墙东侧">
+            </div>
+            <div class="form-group">
+              <label>预警类型</label>
+              <select><option>周界入侵</option><option>人员聚集</option><option>打架斗殴</option><option>攀爬检测</option><option>烟火检测</option><option>其他</option></select>
+            </div>
+            <div class="form-group">
+              <label>摄像机类型</label>
+              <select><option>枪机</option><option>球机</option><option>半球</option><option>全景</option></select>
+            </div>
+            <div class="form-group">
+              <label>数量</label>
+              <div class="suffix"><input type="number" class="alarm-cam-count" value="0" min="0" oninput="updateSummary()"><span>台</span></div>
+            </div>
+            <div class="form-group">
+              <label>安装方式</label>
+              <select><option>壁装</option><option>吊装</option><option>立杆</option></select>
+            </div>
+            <div class="form-group">
+              <label>备注</label>
+              <input type="text" placeholder="补充说明">
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-add" onclick="addAlarmPoint()">➕ 添加预警点</button>
+    </div>
+  </div>
+
+  <!-- ========== 出入口 ========== -->
+  <div class="tab-content" id="tab-entrance">
+    <div class="section">
+      <div class="section-title">🚪 出入口详细配置</div>
+      <div id="entranceDetailList">
+        <div class="dynamic-item">
+          <div class="item-header">
+            <span class="item-title">出入口 #1</span>
+            <button class="btn btn-danger" onclick="removeItem(this)">删除</button>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>校门名称</label>
+              <input type="text" placeholder="如：北门">
+            </div>
+            <div class="form-group">
+              <label>闸机数量</label>
+              <div class="suffix"><input type="number" placeholder="0"><span>台</span></div>
+            </div>
+            <div class="form-group">
+              <label>闸机类型</label>
+              <select><option>翼闸</option><option>摆闸</option><option>速通门</option><option>三辊闸</option></select>
+            </div>
+            <div class="form-group">
+              <label>人脸终端数量</label>
+              <div class="suffix"><input type="number" placeholder="0"><span>台</span></div>
+            </div>
+            <div class="form-group">
+              <label>车辆道闸</label>
+              <select><option>无</option><option>有</option></select>
+            </div>
+            <div class="form-group">
+              <label>访客机</label>
+              <select><option>无</option><option>有</option></select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-add" onclick="addEntranceDetail()">➕ 添加出入口</button>
+    </div>
+    <div class="section">
+      <div class="section-title">📸 现场照片</div>
+      <div class="upload-area">
+        <input type="file" accept="image/*" multiple onchange="handleUpload(this, 'entrancePhotoPreview', 10)">
+        <div class="icon-upload">📷</div>
+        <div>拍摄/上传图片</div>
+      </div>
+      <div class="preview-container" id="entrancePhotoPreview"></div>
+    </div>
+  </div>
+
+  <!-- ========== 宿管 ========== -->
+  <div class="tab-content" id="tab-dorm">
+    <div class="section">
+      <div class="section-title">🏠 宿管详细配置</div>
+      <div id="dormDetailList">
+        <div class="dynamic-item">
+          <div class="item-header">
+            <span class="item-title">宿舍 #1</span>
+            <button class="btn btn-danger" onclick="removeItem(this)">删除</button>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>宿舍名称</label>
+              <input type="text" placeholder="如：1号宿舍楼">
+            </div>
+            <div class="form-group">
+              <label>楼层数</label>
+              <div class="suffix"><input type="number" placeholder="请输入"><span>层</span></div>
+            </div>
+            <div class="form-group">
+              <label>出入口数量</label>
+              <div class="suffix"><input type="number" placeholder="请输入"><span>个</span></div>
+            </div>
+            <div class="form-group">
+              <label>考勤点数量</label>
+              <div class="suffix"><input type="number" placeholder="请输入"><span>个</span></div>
+            </div>
+            <div class="form-group">
+              <label>宿管室数量</label>
+              <div class="suffix"><input type="number" placeholder="请输入"><span>个</span></div>
+            </div>
+            <div class="form-group">
+              <label>摄像机数量</label>
+              <div class="suffix"><input type="number" class="dorm-detail-cam" placeholder="0" oninput="updateSummary()"><span>台</span></div>
+            </div>
+            <div class="form-group">
+              <label>人脸终端数量</label>
+              <div class="suffix"><input type="number" placeholder="0"><span>台</span></div>
+            </div>
+            <div class="form-group">
+              <label>灯光情况</label>
+              <input type="text" placeholder="如：充足/不足">
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-add" onclick="addDormDetail()">➕ 添加宿舍</button>
+    </div>
+    <div class="section">
+      <div class="section-title">📸 现场照片</div>
+      <div class="upload-area">
+        <input type="file" accept="image/*" multiple onchange="handleUpload(this, 'dormPhotoPreview', 10)">
+        <div class="icon-upload">📷</div>
+        <div>拍摄/上传图片</div>
+      </div>
+      <div class="preview-container" id="dormPhotoPreview"></div>
+    </div>
+  </div>
+
+  <!-- ========== 监控增加 ========== -->
+  <div class="tab-content" id="tab-monitor">
+    <div class="section">
+      <div class="section-title">➕ 监控增加摄像机布点</div>
+      <div id="monitorList">
+        <div class="dynamic-item">
+          <div class="item-header">
+            <span class="item-title">监控点 #1</span>
+            <button class="btn btn-danger" onclick="removeItem(this)">删除</button>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>安装位置</label>
+              <input type="text" placeholder="如：操场西侧">
+            </div>
+            <div class="form-group">
+              <label>摄像机类型</label>
+              <select><option>枪机</option><option>球机</option><option>半球</option><option>全景</option></select>
+            </div>
+            <div class="form-group">
+              <label>数量</label>
+              <div class="suffix"><input type="number" class="monitor-cam-count" value="0" min="0" oninput="updateSummary()"><span>台</span></div>
+            </div>
+            <div class="form-group">
+              <label>安装方式</label>
+              <select><option>壁装</option><option>吊装</option><option>立杆</option></select>
+            </div>
+            <div class="form-group">
+              <label>用途说明</label>
+              <input type="text" placeholder="补充说明">
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-add" onclick="addMonitorPoint()">➕ 添加监控点</button>
+    </div>
+  </div>
+
+  <!-- ========== 实施费用参考 ========== -->
+  <div class="tab-content" id="tab-cost">
+    <div class="section">
+      <div class="section-title">🔥 实施费用参考</div>
+      <table class="cost-table" id="costTable">
+        <thead>
+          <tr>
+            <th style="width:40px">序号</th>
+            <th>设备/项目名称</th>
+            <th style="width:80px">单位</th>
+            <th style="width:80px">数量</th>
+            <th style="width:120px">单价(元)</th>
+            <th style="width:120px">合计(元)</th>
+            <th>备注</th>
+          </tr>
+        </thead>
+        <tbody id="costBody">
+          <tr>
+            <td>1</td>
+            <td><input type="text" placeholder="如：人脸闸机"></td>
+            <td><input type="text" value="台"></td>
+            <td><input type="number" class="cost-qty" value="0" oninput="calcCostRow(this)"></td>
+            <td><input type="number" class="cost-price" value="0" oninput="calcCostRow(this)"></td>
+            <td class="cost-subtotal">0</td>
+            <td><input type="text" placeholder="备注"></td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="5" style="text-align:right;font-weight:600;">合计</td>
+            <td id="costGrandTotal" style="font-weight:600;color:#2563eb;">0</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+      <button class="btn btn-primary btn-add" onclick="addCostRow()" style="margin-top:12px;">➕ 添加费用项</button>
+    </div>
+  </div>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="close-btn" onclick="closeLightbox()">&times;</button>
+  <img id="lightboxImg" src="" alt="预览">
+</div>
+
+<!-- Bottom actions -->
+<div class="bottom-actions">
+  <button class="btn btn-lg btn-save" onclick="saveData()">💾 保存数据</button>
+  <button class="btn btn-lg btn-export" onclick="exportToExcel()">📤 导出Excel表格</button>
+</div>
+
+<script>
+// Auth guard
+(function() {
+  const token = localStorage.getItem('token');
+  const user = localStorage.getItem('user');
+  if (!token || !user) { window.location.href = 'index.html'; return; }
+  try {
+    const u = JSON.parse(user);
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('currentUser').textContent = u.name || u.username;
+    });
+  } catch(e) { window.location.href = 'index.html'; }
+})();
+function logout() {
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  window.location.href = 'index.html';
+}
+
+// Tab switching
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+  });
+});
+
+function updateHeader() {
+  const name = document.getElementById('projectName').value;
+  const surveyor = document.getElementById('surveyor').value;
+  document.getElementById('headerSchoolName').textContent = name ? name.split('——')[0] || name : 'XXXX学校';
+  document.getElementById('headerSurveyor').textContent = surveyor || 'XXX';
+}
+
+function updateSummary() {
+  const total = document.getElementById('totalPeople').value || 0;
+  const students = document.getElementById('studentCount').value || 0;
+  const staff = document.getElementById('staffCount').value || 0;
+  document.getElementById('sumTotal').textContent = total;
+  document.getElementById('sumStudents').textContent = students;
+  document.getElementById('sumStaff').textContent = staff;
+
+  let trackCam = 0;
+  document.querySelectorAll('.track-cam-count').forEach(el => trackCam += Number(el.value) || 0);
+  document.getElementById('sumTrackCam').textContent = trackCam;
+
+  let alarmCam = 0;
+  document.querySelectorAll('.alarm-cam-count').forEach(el => alarmCam += Number(el.value) || 0);
+  document.getElementById('sumAlarmCam').textContent = alarmCam;
+
+  let addCam = 0;
+  document.querySelectorAll('.monitor-cam-count').forEach(el => addCam += Number(el.value) || 0);
+  document.getElementById('sumAddCam').textContent = addCam;
+
+  const dormCam = Number(document.getElementById('dormCamCount')?.value) || 0;
+  document.getElementById('sumDormCam').textContent = dormCam;
+
+  document.getElementById('sumTotalCam').textContent = trackCam + alarmCam + addCam + dormCam;
+}
+
+function removeItem(btn) {
+  btn.closest('.dynamic-item').remove();
+  updateSummary();
+}
+
+function addEntrance() {
+  const list = document.getElementById('entranceOverviewList');
+  const item = document.createElement('div');
+  item.className = 'dynamic-item';
+  item.innerHTML = `
+    <div class="item-header"><span class="item-title">出入口</span><button class="btn btn-danger" onclick="removeItem(this)">删除</button></div>
+    <div class="form-grid">
+      <div class="form-group"><label>校门</label><input type="text" placeholder="如：南门"></div>
+      <div class="form-group"><label>是否有旧闸机</label><input type="text" placeholder="如北门新增，南门利旧"></div>
+      <div class="form-group"><label>是否通行电动车</label><select><option>否</option><option>是</option></select></div>
+      <div class="form-group"><label>通行方式</label><input type="text" placeholder="如北门混进混出"></div>
+      <div class="form-group"><label>认证方式</label><select><option>人脸</option><option>刷卡</option><option>人脸+刷卡</option><option>二维码</option></select></div>
+    </div>`;
+  list.appendChild(item);
+}
+
+function addTrackPoint() {
+  const list = document.getElementById('trackList');
+  const n = list.children.length + 1;
+  const item = document.createElement('div');
+  item.className = 'dynamic-item';
+  item.innerHTML = `
+    <div class="item-header"><span class="item-title">轨迹点 #${n}</span><button class="btn btn-danger" onclick="removeItem(this)">删除</button></div>
+    <div class="form-grid">
+      <div class="form-group"><label>安装位置</label><input type="text" placeholder="如：教学楼B栋走廊"></div>
+      <div class="form-group"><label>摄像机类型</label><select><option>枪机</option><option>球机</option><option>半球</option><option>全景</option></select></div>
+      <div class="form-group"><label>数量</label><div class="suffix"><input type="number" class="track-cam-count" value="1" min="1" oninput="updateSummary()"><span>台</span></div></div>
+      <div class="form-group"><label>安装方式</label><select><option>壁装</option><option>吊装</option><option>立杆</option></select></div>
+      <div class="form-group"><label>供电方式</label><select><option>POE</option><option>DC12V</option><option>AC220V</option></select></div>
+      <div class="form-group"><label>备注</label><input type="text" placeholder="补充说明"></div>
+    </div>`;
+  list.appendChild(item);
+}
+
+function addAlarmPoint() {
+  const list = document.getElementById('alarmList');
+  const n = list.children.length + 1;
+  const item = document.createElement('div');
+  item.className = 'dynamic-item';
+  item.innerHTML = `
+    <div class="item-header"><span class="item-title">预警点 #${n}</span><button class="btn btn-danger" onclick="removeItem(this)">删除</button></div>
+    <div class="form-grid">
+      <div class="form-group"><label>安装位置</label><input type="text" placeholder="如：围墙西侧"></div>
+      <div class="form-group"><label>预警类型</label><select><option>周界入侵</option><option>人员聚集</option><option>打架斗殴</option><option>攀爬检测</option><option>烟火检测</option><option>其他</option></select></div>
+      <div class="form-group"><label>摄像机类型</label><select><option>枪机</option><option>球机</option><option>半球</option><option>全景</option></select></div>
+      <div class="form-group"><label>数量</label><div class="suffix"><input type="number" class="alarm-cam-count" value="0" min="0" oninput="updateSummary()"><span>台</span></div></div>
+      <div class="form-group"><label>安装方式</label><select><option>壁装</option><option>吊装</option><option>立杆</option></select></div>
+      <div class="form-group"><label>备注</label><input type="text" placeholder="补充说明"></div>
+    </div>`;
+  list.appendChild(item);
+}
+
+function addEntranceDetail() {
+  const list = document.getElementById('entranceDetailList');
+  const n = list.children.length + 1;
+  const item = document.createElement('div');
+  item.className = 'dynamic-item';
+  item.innerHTML = `
+    <div class="item-header"><span class="item-title">出入口 #${n}</span><button class="btn btn-danger" onclick="removeItem(this)">删除</button></div>
+    <div class="form-grid">
+      <div class="form-group"><label>校门名称</label><input type="text" placeholder="如：南门"></div>
+      <div class="form-group"><label>闸机数量</label><div class="suffix"><input type="number" placeholder="0"><span>台</span></div></div>
+      <div class="form-group"><label>闸机类型</label><select><option>翼闸</option><option>摆闸</option><option>速通门</option><option>三辊闸</option></select></div>
+      <div class="form-group"><label>人脸终端数量</label><div class="suffix"><input type="number" placeholder="0"><span>台</span></div></div>
+      <div class="form-group"><label>车辆道闸</label><select><option>无</option><option>有</option></select></div>
+      <div class="form-group"><label>访客机</label><select><option>无</option><option>有</option></select></div>
+    </div>`;
+  list.appendChild(item);
+}
+
+function addDormDetail() {
+  const list = document.getElementById('dormDetailList');
+  const n = list.children.length + 1;
+  const item = document.createElement('div');
+  item.className = 'dynamic-item';
+  item.innerHTML = `
+    <div class="item-header"><span class="item-title">宿舍 #${n}</span><button class="btn btn-danger" onclick="removeItem(this)">删除</button></div>
+    <div class="form-grid">
+      <div class="form-group"><label>宿舍名称</label><input type="text" placeholder="如：2号宿舍楼"></div>
+      <div class="form-group"><label>楼层数</label><div class="suffix"><input type="number" placeholder="请输入"><span>层</span></div></div>
+      <div class="form-group"><label>出入口数量</label><div class="suffix"><input type="number" placeholder="请输入"><span>个</span></div></div>
+      <div class="form-group"><label>考勤点数量</label><div class="suffix"><input type="number" placeholder="请输入"><span>个</span></div></div>
+      <div class="form-group"><label>宿管室数量</label><div class="suffix"><input type="number" placeholder="请输入"><span>个</span></div></div>
+      <div class="form-group"><label>摄像机数量</label><div class="suffix"><input type="number" class="dorm-detail-cam" placeholder="0" oninput="updateSummary()"><span>台</span></div></div>
+      <div class="form-group"><label>人脸终端数量</label><div class="suffix"><input type="number" placeholder="0"><span>台</span></div></div>
+      <div class="form-group"><label>灯光情况</label><input type="text" placeholder="如：充足/不足"></div>
+    </div>`;
+  list.appendChild(item);
+}
+
+function addMonitorPoint() {
+  const list = document.getElementById('monitorList');
+  const n = list.children.length + 1;
+  const item = document.createElement('div');
+  item.className = 'dynamic-item';
+  item.innerHTML = `
+    <div class="item-header"><span class="item-title">监控点 #${n}</span><button class="btn btn-danger" onclick="removeItem(this)">删除</button></div>
+    <div class="form-grid">
+      <div class="form-group"><label>安装位置</label><input type="text" placeholder="如：食堂入口"></div>
+      <div class="form-group"><label>摄像机类型</label><select><option>枪机</option><option>球机</option><option>半球</option><option>全景</option></select></div>
+      <div class="form-group"><label>数量</label><div class="suffix"><input type="number" class="monitor-cam-count" value="0" min="0" oninput="updateSummary()"><span>台</span></div></div>
+      <div class="form-group"><label>安装方式</label><select><option>壁装</option><option>吊装</option><option>立杆</option></select></div>
+      <div class="form-group"><label>用途说明</label><input type="text" placeholder="补充说明"></div>
+    </div>`;
+  list.appendChild(item);
+}
+
+function addCostRow() {
+  const tbody = document.getElementById('costBody');
+  const n = tbody.children.length + 1;
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td>${n}</td>
+    <td><input type="text" placeholder="设备名称"></td>
+    <td><input type="text" value="台"></td>
+    <td><input type="number" class="cost-qty" value="0" oninput="calcCostRow(this)"></td>
+    <td><input type="number" class="cost-price" value="0" oninput="calcCostRow(this)"></td>
+    <td class="cost-subtotal">0</td>
+    <td><input type="text" placeholder="备注"></td>`;
+  tbody.appendChild(tr);
+}
+
+function calcCostRow(el) {
+  const tr = el.closest('tr');
+  const qty = Number(tr.querySelector('.cost-qty').value) || 0;
+  const price = Number(tr.querySelector('.cost-price').value) || 0;
+  tr.querySelector('.cost-subtotal').textContent = (qty * price).toLocaleString();
+  let total = 0;
+  document.querySelectorAll('.cost-subtotal').forEach(td => total += Number(td.textContent.replace(/,/g, '')) || 0);
+  document.getElementById('costGrandTotal').textContent = total.toLocaleString();
+}
+
+function handleUpload(input, previewId, max) {
+  const container = document.getElementById(previewId);
+  const existing = container.children.length;
+  const files = Array.from(input.files).slice(0, max - existing);
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const div = document.createElement('div');
+      div.className = 'preview-item';
+      div.innerHTML = `<img src="${e.target.result}" onclick="openLightbox(this.src)"><button class="remove" onclick="event.stopPropagation();this.parentElement.remove()">×</button>`;
+      container.appendChild(div);
+    };
+    reader.readAsDataURL(file);
+  });
+  input.value = '';
+}
+
+function openLightbox(src) {
+  document.getElementById('lightboxImg').src = src;
+  document.getElementById('lightbox').classList.add('active');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('active');
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+function collectFormData() {
+  const data = {};
+  data.projectName = document.getElementById('projectName').value;
+  data.surveyor = document.getElementById('surveyor').value;
+  data.totalPeople = document.getElementById('totalPeople').value;
+  data.staffCount = document.getElementById('staffCount').value;
+  data.studentCount = document.getElementById('studentCount').value;
+  data.boarderCount = document.getElementById('boarderCount').value;
+  data.classCount = document.getElementById('classCount').value;
+  data.mainGate = document.getElementById('mainGate').value;
+  data.notes = document.getElementById('overviewNotes').value;
+  data.timestamp = new Date().toISOString();
+  return data;
+}
+
+function saveData() {
+  const data = collectFormData();
+  localStorage.setItem('schoolSurvey', JSON.stringify(data));
+  alert('数据已保存到本地！');
+}
+
+function collectDynamicItems(containerId, fields) {
+  const rows = [];
+  document.querySelectorAll(`#${containerId} .dynamic-item`).forEach(item => {
+    const row = {};
+    const inputs = item.querySelectorAll('input, select');
+    const labels = item.querySelectorAll('label');
+    labels.forEach((label, i) => {
+      const input = inputs[i];
+      if (input) row[label.textContent.trim()] = input.value;
+    });
+    rows.push(row);
+  });
+  return rows;
+}
+
+function collectCostTable() {
+  const rows = [];
+  document.querySelectorAll('#costBody tr').forEach(tr => {
+    const cells = tr.querySelectorAll('td');
+    rows.push({
+      '序号': cells[0]?.textContent || '',
+      '设备/项目名称': cells[1]?.querySelector('input')?.value || '',
+      '单位': cells[2]?.querySelector('input')?.value || '',
+      '数量': cells[3]?.querySelector('input')?.value || '',
+      '单价(元)': cells[4]?.querySelector('input')?.value || '',
+      '合计(元)': cells[5]?.textContent || '',
+      '备注': cells[6]?.querySelector('input')?.value || ''
+    });
+  });
+  return rows;
+}
+
+function exportToExcel() {
+  const basic = collectFormData();
+  const entrances = collectDynamicItems('entranceOverviewList');
+  const dorms = collectDynamicItems('dormOverviewList');
+  const tracks = collectDynamicItems('trackList');
+  const alarms = collectDynamicItems('alarmList');
+  const entranceDetails = collectDynamicItems('entranceDetailList');
+  const dormDetails = collectDynamicItems('dormDetailList');
+  const monitors = collectDynamicItems('monitorList');
+  const costs = collectCostTable();
+
+  function sheetFromRows(title, rows) {
+    if (!rows.length) return '';
+    const headers = Object.keys(rows[0]);
+    let html = `<table><tr><td colspan="${headers.length}" style="font-size:16px;font-weight:bold;background:#1e40af;color:#fff;">${title}</td></tr>`;
+    html += '<tr>' + headers.map(h => `<th style="background:#f3f4f6;font-weight:bold;border:1px solid #ccc;padding:6px;">${h}</th>`).join('') + '</tr>';
+    rows.forEach(row => {
+      html += '<tr>' + headers.map(h => `<td style="border:1px solid #ccc;padding:6px;">${row[h] || ''}</td>`).join('') + '</tr>';
+    });
+    html += '</table><br/>';
+    return html;
+  }
+
+  function sheetFromObject(title, obj) {
+    let html = `<table><tr><td colspan="2" style="font-size:16px;font-weight:bold;background:#1e40af;color:#fff;">${title}</td></tr>`;
+    const labelMap = {
+      projectName: '项目名称', surveyor: '勘测人', totalPeople: '全校总人数',
+      staffCount: '教职工人数', studentCount: '学生总人数', boarderCount: '住宿生人数',
+      classCount: '班级数量', mainGate: '校门', notes: '备注', timestamp: '导出时间'
+    };
+    Object.keys(obj).forEach(key => {
+      html += `<tr><th style="background:#f3f4f6;font-weight:bold;border:1px solid #ccc;padding:6px;width:150px;">${labelMap[key] || key}</th><td style="border:1px solid #ccc;padding:6px;">${obj[key] || ''}</td></tr>`;
+    });
+    html += '</table><br/>';
+    return html;
+  }
+
+  let html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+<head><meta charset="UTF-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>安防工勘表</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body>`;
+  html += sheetFromObject('📍 项目基本信息', basic);
+  if (entrances.length) html += sheetFromRows('🚪 出入口总览', entrances);
+  if (dorms.length) html += sheetFromRows('🏠 宿管总览', dorms);
+  if (tracks.length) html += sheetFromRows('👣 人员轨迹摄像机布点', tracks);
+  if (alarms.length) html += sheetFromRows('🚨 事件预警摄像机布点', alarms);
+  if (entranceDetails.length) html += sheetFromRows('🚪 出入口详细配置', entranceDetails);
+  if (dormDetails.length) html += sheetFromRows('🏠 宿管详细配置', dormDetails);
+  if (monitors.length) html += sheetFromRows('➕ 监控增加摄像机布点', monitors);
+  if (costs.length) html += sheetFromRows('🔥 实施费用参考', costs);
+
+  // Summary
+  html += `<table><tr><td colspan="2" style="font-size:16px;font-weight:bold;background:#1e40af;color:#fff;">📊 汇总统计</td></tr>`;
+  html += `<tr><th style="background:#f3f4f6;border:1px solid #ccc;padding:6px;">项目</th><th style="background:#f3f4f6;border:1px solid #ccc;padding:6px;">数值</th></tr>`;
+  ['sumTotal','sumStudents','sumStaff','sumTrackCam','sumAlarmCam','sumAddCam','sumDormCam','sumTotalCam'].forEach(id => {
+    const el = document.getElementById(id);
+    const label = el.closest('.summary-tag').textContent.replace(/\d+/g,'').trim();
+    html += `<tr><td style="border:1px solid #ccc;padding:6px;">${label}</td><td style="border:1px solid #ccc;padding:6px;">${el.textContent}</td></tr>`;
+  });
+  html += '</table>';
+  html += '</body></html>';
+
+  const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (basic.projectName || '安防工勘表') + '.xls';
+  a.click();
+}
+
+// Load saved data on start
+window.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem('schoolSurvey');
+  if (saved) {
+    try {
+      const data = JSON.parse(saved);
+      Object.keys(data).forEach(key => {
+        const el = document.getElementById(key);
+        if (el) el.value = data[key];
+      });
+      updateHeader();
+      updateSummary();
+    } catch(e) {}
+  }
+});
+</script>
+</body>
+</html>
