@@ -143,6 +143,21 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft Ya
 .entrance-photo-section { margin-top: 16px; padding-top: 16px; border-top: 1px solid #f3f4f6; }
 .entrance-photo-title { font-size: 13px; color: #374151; font-weight: 500; margin-bottom: 10px; }
 .entrance-preview { margin-top: 8px; }
+
+/* Dorm tab redesign */
+.dorm-banner { background: linear-gradient(135deg, #fef3c7, #fde68a); border-left: 4px solid #f59e0b; border-radius: 10px; padding: 14px 20px; font-size: 15px; font-weight: 600; color: #374151; margin-bottom: 20px; }
+.dorm-card { display: flex; overflow: hidden; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); margin-bottom: 20px; background: #fff; }
+.dorm-card-body { flex: 1; padding: 20px 24px; }
+.dorm-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+.dorm-card-title { font-size: 17px; font-weight: 600; color: #2563eb; }
+.dorm-top-fields { display: flex; gap: 24px; margin-bottom: 16px; }
+.dorm-checkpoint-list { }
+.dorm-checkpoint { background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 10px; padding: 18px 20px; margin-bottom: 14px; }
+.dorm-cp-header { font-size: 15px; margin-bottom: 14px; display: flex; align-items: center; gap: 6px; }
+.dorm-cp-fields { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px 20px; margin-bottom: 16px; }
+.dorm-cp-photo { margin-bottom: 14px; }
+.dorm-cp-photo-label { font-size: 13px; color: #374151; font-weight: 500; margin-bottom: 8px; }
+.dorm-cp-preview { margin-top: 8px; }
 .btn-lg { padding: 10px 32px; font-size: 15px; border-radius: 8px; }
 .btn-export { background: #10b981; color: #fff; border: none; }
 .btn-export:hover { background: #059669; }
@@ -391,60 +406,54 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft Ya
 
   <!-- ========== 宿管 ========== -->
   <div class="tab-content" id="tab-dorm">
-    <div class="section">
-      <div class="section-title">🏠 宿管详细配置</div>
-      <div id="dormDetailList">
-        <div class="dynamic-item">
-          <div class="item-header">
-            <span class="item-title">宿舍 #1</span>
-            <button class="btn btn-danger" onclick="removeItem(this)">删除</button>
+    <div class="dorm-banner">🏠 宿舍无感考勤现场工勘</div>
+    <div id="dormCardList">
+      <div class="dorm-card">
+        <div class="entrance-card-bar"></div>
+        <div class="dorm-card-body">
+          <div class="dorm-card-header">
+            <span class="entrance-icon">🏠</span>
+            <span class="dorm-card-title">宿舍1</span>
+            <button class="track-delete-btn" onclick="this.closest('.dorm-card').remove()" title="删除" style="margin-left:auto;font-size:20px;">✕</button>
           </div>
-          <div class="form-grid">
-            <div class="form-group">
-              <label>宿舍名称</label>
-              <input type="text" placeholder="如：1号宿舍楼">
+          <div class="dorm-top-fields">
+            <div class="ov-field"><label>出入口数量</label><input type="text" placeholder="请输入"></div>
+            <div class="ov-field"><label>宿管室数量</label><input type="text" placeholder="请输入"></div>
+          </div>
+          <div class="dorm-checkpoint-list">
+            <div class="dorm-checkpoint">
+              <div class="dorm-cp-header"><span style="color:#ef4444">📍</span> <span class="dorm-cp-title" style="color:#2563eb;font-weight:600;">考勤点1</span></div>
+              <div class="dorm-cp-fields">
+                <div class="ov-field"><label>通道宽度</label><input type="text" placeholder="如6.5m"></div>
+                <div class="ov-field"><label>建议摄像机数量</label><input type="text" placeholder="如8个"></div>
+                <div class="ov-field"><label>考勤点灯光情况</label><select><option value="">请选择</option><option>充足</option><option>不足</option><option>无灯光</option></select></div>
+                <div class="ov-field"><label>是否存在部分学生不从通道经过</label><select><option value="">请选择</option><option>否</option><option>是</option></select></div>
+              </div>
+              <div class="dorm-cp-photo">
+                <div class="dorm-cp-photo-label">📷 考勤点1现场照片</div>
+                <div class="upload-area" style="padding:20px;background:#fffbeb;border-color:#fbbf24;"><input type="file" accept="image/*" multiple onchange="handleDormUpload(this)"><div class="icon-upload">📷</div><div style="color:#2563eb;font-size:13px;">拍摄/上传</div></div>
+                <div class="preview-container dorm-cp-preview"></div>
+              </div>
+              <div class="dorm-cp-photo">
+                <div class="dorm-cp-photo-label">📷 摄像机安装位置照片</div>
+                <div class="upload-area" style="padding:20px;background:#eff6ff;border-color:#60a5fa;"><input type="file" accept="image/*" multiple onchange="handleDormUpload(this)"><div class="icon-upload">📷</div><div style="color:#2563eb;font-size:13px;">拍摄/上传</div></div>
+                <div class="preview-container dorm-cp-preview"></div>
+              </div>
+              <div class="dorm-cp-photo">
+                <div class="dorm-cp-photo-label">📷 考勤反馈屏安装位置照片</div>
+                <div class="upload-area" style="padding:20px;background:#eff6ff;border-color:#60a5fa;"><input type="file" accept="image/*" multiple onchange="handleDormUpload(this)"><div class="icon-upload">📷</div><div style="color:#2563eb;font-size:13px;">拍摄/上传</div></div>
+                <div class="preview-container dorm-cp-preview"></div>
+              </div>
             </div>
-            <div class="form-group">
-              <label>楼层数</label>
-              <div class="suffix"><input type="number" placeholder="请输入"><span>层</span></div>
-            </div>
-            <div class="form-group">
-              <label>出入口数量</label>
-              <div class="suffix"><input type="number" placeholder="请输入"><span>个</span></div>
-            </div>
-            <div class="form-group">
-              <label>考勤点数量</label>
-              <div class="suffix"><input type="number" placeholder="请输入"><span>个</span></div>
-            </div>
-            <div class="form-group">
-              <label>宿管室数量</label>
-              <div class="suffix"><input type="number" placeholder="请输入"><span>个</span></div>
-            </div>
-            <div class="form-group">
-              <label>摄像机数量</label>
-              <div class="suffix"><input type="number" class="dorm-detail-cam" placeholder="0" oninput="updateSummary()"><span>台</span></div>
-            </div>
-            <div class="form-group">
-              <label>人脸终端数量</label>
-              <div class="suffix"><input type="number" placeholder="0"><span>台</span></div>
-            </div>
-            <div class="form-group">
-              <label>灯光情况</label>
-              <input type="text" placeholder="如：充足/不足">
-            </div>
+          </div>
+          <div class="track-add-btn" onclick="addCheckpoint(this)" style="margin-top:12px;">
+            <span>＋ 添加考勤点</span>
           </div>
         </div>
       </div>
-      <button class="btn btn-primary btn-add" onclick="addDormDetail()">➕ 添加宿舍</button>
     </div>
-    <div class="section">
-      <div class="section-title">📸 现场照片</div>
-      <div class="upload-area">
-        <input type="file" accept="image/*" multiple onchange="handleUpload(this, 'dormPhotoPreview', 10)">
-        <div class="icon-upload">📷</div>
-        <div>拍摄/上传图片</div>
-      </div>
-      <div class="preview-container" id="dormPhotoPreview"></div>
+    <div class="track-add-btn" onclick="addDormCard()" style="margin-top:16px;">
+      <span>＋ 添加宿舍</span>
     </div>
   </div>
 
@@ -824,24 +833,81 @@ function handleEntranceUpload(input) {
   input.value = '';
 }
 
-function addDormDetail() {
-  const list = document.getElementById('dormDetailList');
+function addDormCard() {
+  const list = document.getElementById('dormCardList');
   const n = list.children.length + 1;
-  const item = document.createElement('div');
-  item.className = 'dynamic-item';
-  item.innerHTML = `
-    <div class="item-header"><span class="item-title">宿舍 #${n}</span><button class="btn btn-danger" onclick="removeItem(this)">删除</button></div>
-    <div class="form-grid">
-      <div class="form-group"><label>宿舍名称</label><input type="text" placeholder="如：2号宿舍楼"></div>
-      <div class="form-group"><label>楼层数</label><div class="suffix"><input type="number" placeholder="请输入"><span>层</span></div></div>
-      <div class="form-group"><label>出入口数量</label><div class="suffix"><input type="number" placeholder="请输入"><span>个</span></div></div>
-      <div class="form-group"><label>考勤点数量</label><div class="suffix"><input type="number" placeholder="请输入"><span>个</span></div></div>
-      <div class="form-group"><label>宿管室数量</label><div class="suffix"><input type="number" placeholder="请输入"><span>个</span></div></div>
-      <div class="form-group"><label>摄像机数量</label><div class="suffix"><input type="number" class="dorm-detail-cam" placeholder="0" oninput="updateSummary()"><span>台</span></div></div>
-      <div class="form-group"><label>人脸终端数量</label><div class="suffix"><input type="number" placeholder="0"><span>台</span></div></div>
-      <div class="form-group"><label>灯光情况</label><input type="text" placeholder="如：充足/不足"></div>
+  const card = document.createElement('div');
+  card.className = 'dorm-card';
+  card.innerHTML = `
+    <div class="entrance-card-bar"></div>
+    <div class="dorm-card-body">
+      <div class="dorm-card-header">
+        <span class="entrance-icon">🏠</span>
+        <span class="dorm-card-title">宿舍${n}</span>
+        <button class="track-delete-btn" onclick="this.closest('.dorm-card').remove()" title="删除" style="margin-left:auto;font-size:20px;">✕</button>
+      </div>
+      <div class="dorm-top-fields">
+        <div class="ov-field"><label>出入口数量</label><input type="text" placeholder="请输入"></div>
+        <div class="ov-field"><label>宿管室数量</label><input type="text" placeholder="请输入"></div>
+      </div>
+      <div class="dorm-checkpoint-list"></div>
+      <div class="track-add-btn" onclick="addCheckpoint(this)" style="margin-top:12px;">
+        <span>＋ 添加考勤点</span>
+      </div>
     </div>`;
-  list.appendChild(item);
+  list.appendChild(card);
+  addCheckpoint(card.querySelector('.track-add-btn'));
+}
+
+function addCheckpoint(btn) {
+  const cpList = btn.closest('.dorm-card-body').querySelector('.dorm-checkpoint-list');
+  const n = cpList.children.length + 1;
+  const cp = document.createElement('div');
+  cp.className = 'dorm-checkpoint';
+  cp.innerHTML = `
+    <div class="dorm-cp-header">
+      <span style="color:#ef4444">📍</span>
+      <span class="dorm-cp-title" style="color:#2563eb;font-weight:600;">考勤点${n}</span>
+      <button class="track-delete-btn" onclick="this.closest('.dorm-checkpoint').remove()" title="删除" style="margin-left:auto;">✕</button>
+    </div>
+    <div class="dorm-cp-fields">
+      <div class="ov-field"><label>通道宽度</label><input type="text" placeholder="如6.5m"></div>
+      <div class="ov-field"><label>建议摄像机数量</label><input type="text" placeholder="如8个"></div>
+      <div class="ov-field"><label>考勤点灯光情况</label><select><option value="">请选择</option><option>充足</option><option>不足</option><option>无灯光</option></select></div>
+      <div class="ov-field"><label>是否存在部分学生不从通道经过</label><select><option value="">请选择</option><option>否</option><option>是</option></select></div>
+    </div>
+    <div class="dorm-cp-photo">
+      <div class="dorm-cp-photo-label">📷 考勤点${n}现场照片</div>
+      <div class="upload-area" style="padding:20px;background:#fffbeb;border-color:#fbbf24;"><input type="file" accept="image/*" multiple onchange="handleDormUpload(this)"><div class="icon-upload">📷</div><div style="color:#2563eb;font-size:13px;">拍摄/上传</div></div>
+      <div class="preview-container dorm-cp-preview"></div>
+    </div>
+    <div class="dorm-cp-photo">
+      <div class="dorm-cp-photo-label">📷 摄像机安装位置照片</div>
+      <div class="upload-area" style="padding:20px;background:#eff6ff;border-color:#60a5fa;"><input type="file" accept="image/*" multiple onchange="handleDormUpload(this)"><div class="icon-upload">📷</div><div style="color:#2563eb;font-size:13px;">拍摄/上传</div></div>
+      <div class="preview-container dorm-cp-preview"></div>
+    </div>
+    <div class="dorm-cp-photo">
+      <div class="dorm-cp-photo-label">📷 考勤反馈屏安装位置照片</div>
+      <div class="upload-area" style="padding:20px;background:#eff6ff;border-color:#60a5fa;"><input type="file" accept="image/*" multiple onchange="handleDormUpload(this)"><div class="icon-upload">📷</div><div style="color:#2563eb;font-size:13px;">拍摄/上传</div></div>
+      <div class="preview-container dorm-cp-preview"></div>
+    </div>`;
+  cpList.appendChild(cp);
+}
+
+function handleDormUpload(input) {
+  const container = input.closest('.dorm-cp-photo').querySelector('.dorm-cp-preview');
+  const files = Array.from(input.files).slice(0, 10 - container.children.length);
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const div = document.createElement('div');
+      div.className = 'preview-item';
+      div.innerHTML = `<img src="${e.target.result}" onclick="openLightbox(this.src)"><button class="remove" onclick="event.stopPropagation();this.parentElement.remove()">×</button>`;
+      container.appendChild(div);
+    };
+    reader.readAsDataURL(file);
+  });
+  input.value = '';
 }
 
 function addMonitorPoint() {
@@ -970,6 +1036,23 @@ function collectTrackTable() {
   return rows;
 }
 
+function collectDormCards() {
+  const rows = [];
+  document.querySelectorAll('#dormCardList .dorm-card').forEach(card => {
+    const dormName = card.querySelector('.dorm-card-title')?.textContent || '';
+    card.querySelectorAll('.dorm-checkpoint').forEach(cp => {
+      const row = { '宿舍': dormName };
+      cp.querySelectorAll('.ov-field').forEach(f => {
+        const label = f.querySelector('label')?.textContent?.trim();
+        const input = f.querySelector('input, select');
+        if (label && input) row[label] = input.value;
+      });
+      rows.push(row);
+    });
+  });
+  return rows;
+}
+
 function collectEntranceCards() {
   const rows = [];
   document.querySelectorAll('#entranceCardList .entrance-card').forEach(card => {
@@ -1025,7 +1108,7 @@ function exportToExcel() {
   const tracks = collectTrackTable();
   const alarms = collectAlarmTable();
   const entranceDetails = collectEntranceCards();
-  const dormDetails = collectDynamicItems('dormDetailList');
+  const dormDetails = collectDormCards();
   const monitors = collectDynamicItems('monitorList');
   const costs = collectCostTable();
 
