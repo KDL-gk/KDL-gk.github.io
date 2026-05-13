@@ -142,7 +142,7 @@ const server = http.createServer(async (req, res) => {
       const username = url.searchParams.get('username');
       const role = url.searchParams.get('role');
       if (role === 'admin' || !username) return json(res, projects);
-      return json(res, projects.filter(p => p.createdBy === username));
+      return json(res, projects.filter(p => p.createdBy === username || !p.createdBy));
     }
 
     if (p === '/api/projects' && req.method === 'POST') {

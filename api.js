@@ -126,7 +126,7 @@
     }
     const projects = JSON.parse(localStorage.getItem('_survey_projects') || '[]');
     if (u.role === 'admin') return projects;
-    return projects.filter(p => p.createdBy === u.username);
+    return projects.filter(p => p.createdBy === u.username || !p.createdBy);
   };
 
   API.createProject = async function(data) {
