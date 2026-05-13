@@ -1447,21 +1447,23 @@ function exportToExcel() {
 }
 
 // Load saved data on start
-window.addEventListener('DOMContentLoaded', async () => {
-  try {
-    const data = await API.loadSurvey(PROJECT_ID);
-    if (data && Object.keys(data).length) {
-      Object.keys(data).forEach(key => {
-        const el = document.getElementById(key);
-        if (el) el.value = data[key];
-      });
-      updateHeader();
-      updateSummary();
-    }
-  } catch(e) {}
-  if (!document.querySelectorAll('#trackTableBody tr').length) addTrackPoint();
-  if (!document.querySelectorAll('#alarmTableBody tr').length) addAlarmPoint();
-  document.querySelectorAll('#costBody .cost-qty').forEach(el => calcCostRow(el));
+window.addEventListener('DOMContentLoaded', () => {
+  API.ready(async () => {
+    try {
+      const data = await API.loadSurvey(PROJECT_ID);
+      if (data && Object.keys(data).length) {
+        Object.keys(data).forEach(key => {
+          const el = document.getElementById(key);
+          if (el) el.value = data[key];
+        });
+        updateHeader();
+        updateSummary();
+      }
+    } catch(e) {}
+    if (!document.querySelectorAll('#trackTableBody tr').length) addTrackPoint();
+    if (!document.querySelectorAll('#alarmTableBody tr').length) addAlarmPoint();
+    document.querySelectorAll('#costBody .cost-qty').forEach(el => calcCostRow(el));
+  });
 });
 </script>
 </body>
