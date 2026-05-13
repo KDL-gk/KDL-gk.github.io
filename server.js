@@ -130,6 +130,7 @@ const server = http.createServer(async (req, res) => {
         return json(res, { ok: true });
       }
       if (req.method === 'DELETE') {
+        if (target === 'admin') return json(res, { error: '超级管理员不可删除' }, 403);
         const filtered = users.filter(u => u.username !== target);
         writeJSON('users.json', filtered);
         return json(res, { ok: true });

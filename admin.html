@@ -265,16 +265,19 @@ async function renderUsers() {
 
   tbody.innerHTML = users.map((u, i) => {
     const isSelf = u.username === currentUser.username;
+    const isSuper = u.username === 'admin';
     const roleBadge = u.role === 'admin'
       ? '<span class="role-badge role-admin">管理员</span>'
       : '<span class="role-badge role-user">实施人员</span>';
-    const roleSelect = isSelf
+    const roleSelect = (isSelf || isSuper)
       ? roleBadge
       : `<select class="role-select" onchange="changeRole('${u.username}', this.value)">
            <option value="admin" ${u.role==='admin'?'selected':''}>管理员</option>
            <option value="user" ${u.role!=='admin'?'selected':''}>实施人员</option>
          </select>`;
-    const deleteBtn = isSelf
+    const deleteBtn = isSuper
+      ? '<span style="color:#ccc;font-size:12px">超级管理员</span>'
+      : isSelf
       ? '<span style="color:#ccc;font-size:12px">当前账号</span>'
       : `<button class="btn-delete-user" onclick="deleteUser('${u.username}')">删除</button>`;
     return `<tr>
