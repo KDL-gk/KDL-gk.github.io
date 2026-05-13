@@ -98,10 +98,15 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft Ya
 .form-group textarea { min-height: 80px; resize: vertical; }
 
 /* Table for 实施费用 */
-.cost-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
-.cost-table th, .cost-table td { border: 1px solid #e5e7eb; padding: 8px 12px; text-align: left; font-size: 13px; }
-.cost-table th { background: #f3f4f6; font-weight: 600; }
-.cost-table input { border: none; width: 100%; outline: none; background: transparent; }
+.cost-header-note { background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; font-size: 13px; color: #92400e; line-height: 1.8; }
+.cost-table-wrap { overflow-x: auto; }
+.cost-table-v2 { width: 100%; border-collapse: collapse; min-width: 1100px; }
+.cost-table-v2 thead th { background: linear-gradient(135deg, #dbeafe, #bfdbfe); color: #1e40af; padding: 10px 6px; font-size: 12px; font-weight: 600; text-align: center; border: 1px solid #93c5fd; }
+.cost-table-v2 tbody td { padding: 6px 4px; border: 1px solid #e5e7eb; text-align: center; vertical-align: middle; font-size: 12px; }
+.cost-table-v2 tbody input { width: 100%; padding: 4px 6px; border: none; outline: none; background: transparent; font-size: 12px; text-align: center; }
+.cost-table-v2 tbody input:focus { background: #eff6ff; }
+.cost-table-v2 tfoot td { padding: 10px 6px; border: 1px solid #e5e7eb; font-size: 13px; }
+.cost-category td { background: #f0f9ff; font-weight: 600; color: #1e40af; text-align: left !important; padding: 8px 12px !important; font-size: 13px !important; }
 
 /* Bottom actions */
 .bottom-actions { display: flex; justify-content: center; gap: 16px; padding: 24px; }
@@ -498,39 +503,287 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft Ya
   <!-- ========== 实施费用参考 ========== -->
   <div class="tab-content" id="tab-cost">
     <div class="section">
-      <div class="section-title">🔥 实施费用参考</div>
-      <table class="cost-table" id="costTable">
-        <thead>
-          <tr>
-            <th style="width:40px">序号</th>
-            <th>设备/项目名称</th>
-            <th style="width:80px">单位</th>
-            <th style="width:80px">数量</th>
-            <th style="width:120px">单价(元)</th>
-            <th style="width:120px">合计(元)</th>
-            <th>备注</th>
-          </tr>
-        </thead>
-        <tbody id="costBody">
-          <tr>
-            <td>1</td>
-            <td><input type="text" placeholder="如：人脸闸机"></td>
-            <td><input type="text" value="台"></td>
-            <td><input type="number" class="cost-qty" value="0" oninput="calcCostRow(this)"></td>
-            <td><input type="number" class="cost-price" value="0" oninput="calcCostRow(this)"></td>
-            <td class="cost-subtotal">0</td>
-            <td><input type="text" placeholder="备注"></td>
-          </tr>
-        </tbody>
-        <tfoot>
-          <tr>
-            <td colspan="5" style="text-align:right;font-weight:600;">合计</td>
-            <td id="costGrandTotal" style="font-weight:600;color:#2563eb;">0</td>
-            <td></td>
-          </tr>
-        </tfoot>
-      </table>
-      <button class="btn btn-primary btn-add" onclick="addCostRow()" style="margin-top:12px;">➕ 添加费用项</button>
+      <div class="cost-header-note">
+        <p>明确"设备"与"项目集成"的逻辑关系，掌握集成施工中的重要开项和费用组成。</p>
+        <p>围绕安防"1+5+N"方案，以"终端设备+网络传输+辅配件"三大模块展开。</p>
+      </div>
+      <div class="cost-table-wrap">
+        <table class="cost-table-v2" id="costTable">
+          <thead>
+            <tr>
+              <th style="width:40px">序号</th>
+              <th style="width:150px">名称</th>
+              <th style="min-width:280px">规格参数</th>
+              <th style="width:50px">单位</th>
+              <th style="width:60px">数量</th>
+              <th style="width:110px">含税价格<br>(用户价)</th>
+              <th style="width:90px">预算合计</th>
+              <th style="width:90px">施工费用<br>(单价)</th>
+              <th style="width:90px">施工费用<br>(总价)</th>
+              <th style="min-width:160px">备注</th>
+            </tr>
+          </thead>
+          <tbody id="costBody">
+            <tr class="cost-category"><td colspan="10">终端设备</td></tr>
+            <tr>
+              <td>1</td>
+              <td><input type="text" value="室内外摆式速通门(左边机)"></td>
+              <td><input type="text" placeholder="规格参数"></td>
+              <td><input type="text" value="台"></td>
+              <td><input type="number" class="cost-qty" value="1" oninput="calcCostRow(this)"></td>
+              <td><input type="number" class="cost-price" value="0" oninput="calcCostRow(this)"></td>
+              <td class="cost-subtotal">0</td>
+              <td><input type="number" class="cost-labor" value="400" oninput="calcCostRow(this)"></td>
+              <td class="cost-labor-total">400</td>
+              <td><input type="text" placeholder="备注"></td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td><input type="text" value="室内外摆式速通门(中间机)"></td>
+              <td><input type="text" placeholder="规格参数"></td>
+              <td><input type="text" value="台"></td>
+              <td><input type="number" class="cost-qty" value="2" oninput="calcCostRow(this)"></td>
+              <td><input type="number" class="cost-price" value="0" oninput="calcCostRow(this)"></td>
+              <td class="cost-subtotal">0</td>
+              <td><input type="number" class="cost-labor" value="400" oninput="calcCostRow(this)"></td>
+              <td class="cost-labor-total">800</td>
+              <td><input type="text" placeholder="备注"></td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td><input type="text" value="室内外摆式速通门(右边机)"></td>
+              <td><input type="text" placeholder="规格参数"></td>
+              <td><input type="text" value="台"></td>
+              <td><input type="number" class="cost-qty" value="1" oninput="calcCostRow(this)"></td>
+              <td><input type="number" class="cost-price" value="0" oninput="calcCostRow(this)"></td>
+              <td class="cost-subtotal">0</td>
+              <td><input type="number" class="cost-labor" value="400" oninput="calcCostRow(this)"></td>
+              <td class="cost-labor-total">400</td>
+              <td><input type="text" placeholder="备注"></td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td><input type="text" value="400万变焦筒型网络摄像机"></td>
+              <td><input type="text" placeholder="规格参数"></td>
+              <td><input type="text" value="台"></td>
+              <td><input type="number" class="cost-qty" value="40" oninput="calcCostRow(this)"></td>
+              <td><input type="number" class="cost-price" value="0" oninput="calcCostRow(this)"></td>
+              <td class="cost-subtotal">0</td>
+              <td><input type="number" class="cost-labor" value="300" oninput="calcCostRow(this)"></td>
+              <td class="cost-labor-total">12000</td>
+              <td><input type="text" placeholder="备注"></td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td><input type="text" value="防欺凌AI报警器"></td>
+              <td><input type="text" placeholder="规格参数"></td>
+              <td><input type="text" value="个"></td>
+              <td><input type="number" class="cost-qty" value="20" oninput="calcCostRow(this)"></td>
+              <td><input type="number" class="cost-price" value="0" oninput="calcCostRow(this)"></td>
+              <td class="cost-subtotal">0</td>
+              <td><input type="number" class="cost-labor" value="300" oninput="calcCostRow(this)"></td>
+              <td class="cost-labor-total">6000</td>
+              <td><input type="text" placeholder="备注"></td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td><input type="text" value="7寸智能识别终端"></td>
+              <td><input type="text" placeholder="规格参数"></td>
+              <td><input type="text" value="台"></td>
+              <td><input type="number" class="cost-qty" value="20" oninput="calcCostRow(this)"></td>
+              <td><input type="number" class="cost-price" value="0" oninput="calcCostRow(this)"></td>
+              <td class="cost-subtotal">0</td>
+              <td><input type="number" class="cost-labor" value="300" oninput="calcCostRow(this)"></td>
+              <td class="cost-labor-total">6000</td>
+              <td><input type="text" placeholder="备注"></td>
+            </tr>
+            <tr>
+              <td>7</td>
+              <td><input type="text" value="智慧班牌"></td>
+              <td><input type="text" placeholder="规格参数"></td>
+              <td><input type="text" value="台"></td>
+              <td><input type="number" class="cost-qty" value="1" oninput="calcCostRow(this)"></td>
+              <td><input type="number" class="cost-price" value="0" oninput="calcCostRow(this)"></td>
+              <td class="cost-subtotal">0</td>
+              <td><input type="number" class="cost-labor" value="200" oninput="calcCostRow(this)"></td>
+              <td class="cost-labor-total">200</td>
+              <td><input type="text" placeholder="备注"></td>
+            </tr>
+            <tr>
+              <td>8</td>
+              <td><input type="text" value="考勤反馈屏"></td>
+              <td><input type="text" placeholder="规格参数"></td>
+              <td><input type="text" value="台"></td>
+              <td><input type="number" class="cost-qty" value="1" oninput="calcCostRow(this)"></td>
+              <td><input type="number" class="cost-price" value="0" oninput="calcCostRow(this)"></td>
+              <td class="cost-subtotal">0</td>
+              <td><input type="number" class="cost-labor" value="200" oninput="calcCostRow(this)"></td>
+              <td class="cost-labor-total">200</td>
+              <td><input type="text" placeholder="备注"></td>
+            </tr>
+            <tr class="cost-category"><td colspan="10">网络传输</td></tr>
+            <tr>
+              <td>1</td>
+              <td><input type="text" value="9口PoE交换机"></td>
+              <td><input type="text" placeholder="规格参数"></td>
+              <td><input type="text" value="台"></td>
+              <td><input type="number" class="cost-qty" value="1" oninput="calcCostRow(this)"></td>
+              <td><input type="number" class="cost-price" value="1259" oninput="calcCostRow(this)"></td>
+              <td class="cost-subtotal">1259</td>
+              <td><input type="number" class="cost-labor" value="100" oninput="calcCostRow(this)"></td>
+              <td class="cost-labor-total">100</td>
+              <td><input type="text" value="S210-8P2ST（华为坤灵）"></td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td><input type="text" value="24口PoE交换机"></td>
+              <td><input type="text" placeholder="规格参数"></td>
+              <td><input type="text" value="台"></td>
+              <td><input type="number" class="cost-qty" value="1" oninput="calcCostRow(this)"></td>
+              <td><input type="number" class="cost-price" value="3558" oninput="calcCostRow(this)"></td>
+              <td class="cost-subtotal">3558</td>
+              <td><input type="number" class="cost-labor" value="100" oninput="calcCostRow(this)"></td>
+              <td class="cost-labor-total">100</td>
+              <td><input type="text" value="S210-24P2SR（华为坤灵）"></td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td><input type="text" value="48口交换机"></td>
+              <td><input type="text" placeholder="规格参数"></td>
+              <td><input type="text" value="台"></td>
+              <td><input type="number" class="cost-qty" value="1" oninput="calcCostRow(this)"></td>
+              <td><input type="number" class="cost-price" value="5265" oninput="calcCostRow(this)"></td>
+              <td class="cost-subtotal">5265</td>
+              <td><input type="number" class="cost-labor" value="100" oninput="calcCostRow(this)"></td>
+              <td class="cost-labor-total">100</td>
+              <td><input type="text" value="S310-48T4S（华为坤灵）"></td>
+            </tr>
+            <tr class="cost-category"><td colspan="10">辅配件</td></tr>
+            <tr>
+              <td>1</td>
+              <td><input type="text" value="设备立杆"></td>
+              <td><input type="text" value="3.5立杆"></td>
+              <td><input type="text" value="个"></td>
+              <td><input type="number" class="cost-qty" value="5" oninput="calcCostRow(this)"></td>
+              <td><input type="number" class="cost-price" value="700" oninput="calcCostRow(this)"></td>
+              <td class="cost-subtotal">3500</td>
+              <td><input type="number" class="cost-labor" value="500" oninput="calcCostRow(this)"></td>
+              <td class="cost-labor-total">2500</td>
+              <td><input type="text" placeholder="备注"></td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td><input type="text" value="路面开割"></td>
+              <td><input type="text" value="路面开割"></td>
+              <td><input type="text" value="米"></td>
+              <td><input type="number" class="cost-qty" value="5" oninput="calcCostRow(this)"></td>
+              <td><input type="number" class="cost-price" value="0" oninput="calcCostRow(this)"></td>
+              <td class="cost-subtotal">0</td>
+              <td><input type="number" class="cost-labor" value="50" oninput="calcCostRow(this)"></td>
+              <td class="cost-labor-total">250</td>
+              <td><input type="text" value="如需破地，50元一米"></td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td><input type="text" value="户外防水设备箱"></td>
+              <td><input type="text" placeholder="规格参数"></td>
+              <td><input type="text" value="个"></td>
+              <td><input type="number" class="cost-qty" value="1" oninput="calcCostRow(this)"></td>
+              <td><input type="number" class="cost-price" value="500" oninput="calcCostRow(this)"></td>
+              <td class="cost-subtotal">500</td>
+              <td><input type="number" class="cost-labor" value="50" oninput="calcCostRow(this)"></td>
+              <td class="cost-labor-total">50</td>
+              <td><input type="text" value="与立杆配套"></td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td><input type="text" value="网线"></td>
+              <td><input type="text" value="超五类网线"></td>
+              <td><input type="text" value="米"></td>
+              <td><input type="number" class="cost-qty" value="8000" oninput="calcCostRow(this)"></td>
+              <td><input type="number" class="cost-price" value="3" oninput="calcCostRow(this)"></td>
+              <td class="cost-subtotal">24000</td>
+              <td><input type="number" class="cost-labor" value="2" oninput="calcCostRow(this)"></td>
+              <td class="cost-labor-total">16000</td>
+              <td><input type="text" placeholder="备注"></td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td><input type="text" value="PVC管线"></td>
+              <td><input type="text" value="国标PVC20线管"></td>
+              <td><input type="text" value="米"></td>
+              <td><input type="number" class="cost-qty" value="8000" oninput="calcCostRow(this)"></td>
+              <td><input type="number" class="cost-price" value="2.5" oninput="calcCostRow(this)"></td>
+              <td class="cost-subtotal">20000</td>
+              <td><input type="number" class="cost-labor" value="3" oninput="calcCostRow(this)"></td>
+              <td class="cost-labor-total">24000</td>
+              <td><input type="text" value="同网线长度"></td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td><input type="text" value="电源线"></td>
+              <td><input type="text" value="国标RVV 2×1.0mm²"></td>
+              <td><input type="text" value="米"></td>
+              <td><input type="number" class="cost-qty" value="0" oninput="calcCostRow(this)"></td>
+              <td><input type="number" class="cost-price" value="2.5" oninput="calcCostRow(this)"></td>
+              <td class="cost-subtotal">0</td>
+              <td><input type="number" class="cost-labor" value="2" oninput="calcCostRow(this)"></td>
+              <td class="cost-labor-total">0</td>
+              <td><input type="text" placeholder="备注"></td>
+            </tr>
+            <tr>
+              <td>7</td>
+              <td><input type="text" value="光纤"></td>
+              <td><input type="text" value="4芯光纤"></td>
+              <td><input type="text" value="米"></td>
+              <td><input type="number" class="cost-qty" value="0" oninput="calcCostRow(this)"></td>
+              <td><input type="number" class="cost-price" value="2" oninput="calcCostRow(this)"></td>
+              <td class="cost-subtotal">0</td>
+              <td><input type="number" class="cost-labor" value="4" oninput="calcCostRow(this)"></td>
+              <td class="cost-labor-total">0</td>
+              <td><input type="text" placeholder="备注"></td>
+            </tr>
+            <tr>
+              <td>8</td>
+              <td><input type="text" value="熔纤"></td>
+              <td><input type="text" value="光纤熔接"></td>
+              <td><input type="text" value="芯"></td>
+              <td><input type="number" class="cost-qty" value="0" oninput="calcCostRow(this)"></td>
+              <td><input type="number" class="cost-price" value="0" oninput="calcCostRow(this)"></td>
+              <td class="cost-subtotal">0</td>
+              <td><input type="number" class="cost-labor" value="20" oninput="calcCostRow(this)"></td>
+              <td class="cost-labor-total">0</td>
+              <td><input type="text" value="熔纤"></td>
+            </tr>
+            <tr>
+              <td>9</td>
+              <td><input type="text" value="辅材"></td>
+              <td><input type="text" value="工具、线管接口、排插、水晶头等"></td>
+              <td><input type="text" value="批"></td>
+              <td><input type="number" class="cost-qty" value="1" oninput="calcCostRow(this)"></td>
+              <td><input type="number" class="cost-price" value="6000" oninput="calcCostRow(this)"></td>
+              <td class="cost-subtotal">6000</td>
+              <td><input type="number" class="cost-labor" value="0" oninput="calcCostRow(this)"></td>
+              <td class="cost-labor-total">0</td>
+              <td><input type="text" placeholder="备注"></td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="6" style="text-align:right;font-weight:600;">合计</td>
+              <td id="costGrandTotal" style="font-weight:600;color:#2563eb;">0</td>
+              <td></td>
+              <td id="costLaborGrandTotal" style="font-weight:600;color:#ef4444;">0</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:14px;">
+        <button class="btn btn-primary btn-add" onclick="addCostRow('终端设备')">＋ 终端设备</button>
+        <button class="btn btn-primary btn-add" onclick="addCostRow('网络传输')">＋ 网络传输</button>
+        <button class="btn btn-primary btn-add" onclick="addCostRow('辅配件')">＋ 辅配件</button>
+      </div>
     </div>
   </div>
 </div>
@@ -927,29 +1180,48 @@ function addMonitorPoint() {
   list.appendChild(item);
 }
 
-function addCostRow() {
+function addCostRow(category) {
   const tbody = document.getElementById('costBody');
-  const n = tbody.children.length + 1;
+  const catRows = tbody.querySelectorAll('.cost-category');
+  let insertBefore = null;
+  let found = false;
+  for (let i = 0; i < catRows.length; i++) {
+    if (found) { insertBefore = catRows[i]; break; }
+    if (catRows[i].textContent.trim() === category) found = true;
+  }
+  let count = 0;
+  let sibling = found ? catRows[Array.from(catRows).findIndex(r => r.textContent.trim() === category)] : null;
+  if (sibling) { sibling = sibling.nextElementSibling; while (sibling && !sibling.classList.contains('cost-category')) { count++; sibling = sibling.nextElementSibling; } }
   const tr = document.createElement('tr');
   tr.innerHTML = `
-    <td>${n}</td>
+    <td>${count + 1}</td>
     <td><input type="text" placeholder="设备名称"></td>
+    <td><input type="text" placeholder="规格参数"></td>
     <td><input type="text" value="台"></td>
     <td><input type="number" class="cost-qty" value="0" oninput="calcCostRow(this)"></td>
     <td><input type="number" class="cost-price" value="0" oninput="calcCostRow(this)"></td>
     <td class="cost-subtotal">0</td>
+    <td><input type="number" class="cost-labor" value="0" oninput="calcCostRow(this)"></td>
+    <td class="cost-labor-total">0</td>
     <td><input type="text" placeholder="备注"></td>`;
-  tbody.appendChild(tr);
+  if (insertBefore) tbody.insertBefore(tr, insertBefore);
+  else tbody.appendChild(tr);
 }
 
 function calcCostRow(el) {
   const tr = el.closest('tr');
-  const qty = Number(tr.querySelector('.cost-qty').value) || 0;
-  const price = Number(tr.querySelector('.cost-price').value) || 0;
-  tr.querySelector('.cost-subtotal').textContent = (qty * price).toLocaleString();
-  let total = 0;
+  const qty = Number(tr.querySelector('.cost-qty')?.value) || 0;
+  const price = Number(tr.querySelector('.cost-price')?.value) || 0;
+  const labor = Number(tr.querySelector('.cost-labor')?.value) || 0;
+  const sub = tr.querySelector('.cost-subtotal');
+  const labTotal = tr.querySelector('.cost-labor-total');
+  if (sub) sub.textContent = (qty * price).toLocaleString();
+  if (labTotal) labTotal.textContent = (qty * labor).toLocaleString();
+  let total = 0, laborTotal = 0;
   document.querySelectorAll('.cost-subtotal').forEach(td => total += Number(td.textContent.replace(/,/g, '')) || 0);
+  document.querySelectorAll('.cost-labor-total').forEach(td => laborTotal += Number(td.textContent.replace(/,/g, '')) || 0);
   document.getElementById('costGrandTotal').textContent = total.toLocaleString();
+  document.getElementById('costLaborGrandTotal').textContent = laborTotal.toLocaleString();
 }
 
 function handleUpload(input, previewId, max) {
@@ -1087,15 +1359,22 @@ function collectAlarmTable() {
 function collectCostTable() {
   const rows = [];
   document.querySelectorAll('#costBody tr').forEach(tr => {
+    if (tr.classList.contains('cost-category')) {
+      rows.push({ '分类': tr.textContent.trim() });
+      return;
+    }
     const cells = tr.querySelectorAll('td');
     rows.push({
       '序号': cells[0]?.textContent || '',
-      '设备/项目名称': cells[1]?.querySelector('input')?.value || '',
-      '单位': cells[2]?.querySelector('input')?.value || '',
-      '数量': cells[3]?.querySelector('input')?.value || '',
-      '单价(元)': cells[4]?.querySelector('input')?.value || '',
-      '合计(元)': cells[5]?.textContent || '',
-      '备注': cells[6]?.querySelector('input')?.value || ''
+      '名称': cells[1]?.querySelector('input')?.value || '',
+      '规格参数': cells[2]?.querySelector('input')?.value || '',
+      '单位': cells[3]?.querySelector('input')?.value || '',
+      '数量': cells[4]?.querySelector('input')?.value || '',
+      '含税价格': cells[5]?.querySelector('input')?.value || '',
+      '预算合计': cells[6]?.textContent || '',
+      '施工单价': cells[7]?.querySelector('input')?.value || '',
+      '施工总价': cells[8]?.textContent || '',
+      '备注': cells[9]?.querySelector('input')?.value || ''
     });
   });
   return rows;
@@ -1184,6 +1463,7 @@ window.addEventListener('DOMContentLoaded', () => {
   }
   if (!document.querySelectorAll('#trackTableBody tr').length) addTrackPoint();
   if (!document.querySelectorAll('#alarmTableBody tr').length) addAlarmPoint();
+  document.querySelectorAll('#costBody .cost-qty').forEach(el => calcCostRow(el));
 });
 </script>
 </body>
