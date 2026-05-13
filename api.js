@@ -114,13 +114,24 @@
     return { ok: true };
   };
 
+  function _currentUser() {
+    try { return JSON.parse(localStorage.getItem('user')) || {}; } catch { return {}; }
+  }
+
   // ===== Projects =====
   API.getProjects = async function() {
-    if (_online) return get('/api/projects');
-    return JSON.parse(localStorage.getItem('_survey_projects') || '[]');
+    const u = _currentUser();
+    if (_online) {
+      return get('/api/projects?username=' + encodeURIComponent(u.username || '') + '&role=' + encodeURIComponent(u.role || ''));
+    }
+    const projects = JSON.parse(localStorage.getItem('_survey_projects') || '[]');
+    if (u.role === 'admin') return projects;
+    return projects.filter(p => p.createdBy === u.username);
   };
 
   API.createProject = async function(data) {
+    const u = _currentUser();
+    data.createdBy = u.username;
     if (_online) return post('/api/projects', data);
     const projects = JSON.parse(localStorage.getItem('_survey_projects') || '[]');
     const project = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), ...data, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
