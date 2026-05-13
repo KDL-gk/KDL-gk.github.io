@@ -1,0 +1,73 @@
+<view class="container">
+  <view class="stats-bar">
+    <view class="stat-item">
+      <text class="stat-num">{{projects.length}}</text>
+      <text class="stat-label">项目总数</text>
+    </view>
+    <view class="stat-item">
+      <text class="stat-num">{{recentCount}}</text>
+      <text class="stat-label">近7天新增</text>
+    </view>
+  </view>
+
+  <view class="toolbar">
+    <text class="toolbar-title">📋 项目列表</text>
+    <view class="toolbar-btns">
+      <button class="btn-new" bindtap="showModal">➕ 新建项目</button>
+      <button class="btn-admin" wx:if="{{isAdmin}}" bindtap="goAdmin">⚙️</button>
+    </view>
+  </view>
+
+  <view class="project-list" wx:if="{{projects.length}}">
+    <view class="project-card" wx:for="{{projects}}" wx:key="id">
+      <view class="card-accent"></view>
+      <text class="card-icon">🏫</text>
+      <text class="card-title">{{item.name}}</text>
+      <view class="card-info">
+        <text>学校：{{item.school}}</text>
+        <text>勘测人：{{item.surveyor}}</text>
+        <text wx:if="{{item.phone}}">电话：{{item.phone}}</text>
+        <text>创建：{{item.dateStr}}</text>
+      </view>
+      <view class="card-actions">
+        <button class="btn-enter" data-id="{{item.id}}" bindtap="enterProject">📋 进入工勘表</button>
+        <button class="btn-del" data-id="{{item.id}}" bindtap="deleteProject">删除</button>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty" wx:else>
+    <text class="empty-icon">📂</text>
+    <text class="empty-title">暂无项目</text>
+    <text class="empty-sub">点击"新建项目"开始创建</text>
+  </view>
+
+  <button class="btn-logout" bindtap="logout">退出登录</button>
+</view>
+
+<!-- Modal -->
+<view class="modal-mask" wx:if="{{showNewModal}}" bindtap="hideModal">
+  <view class="modal" catchtap="noop">
+    <text class="modal-title">📝 新建工勘项目</text>
+    <view class="form-group">
+      <text class="label">学校名称 *</text>
+      <input value="{{newSchool}}" bindinput="onNewSchool" placeholder="如：XX市第一中学" />
+    </view>
+    <view class="form-group">
+      <text class="label">勘测人 *</text>
+      <input value="{{newSurveyor}}" disabled="{{true}}" style="background:#f3f4f6;color:#374151;" />
+    </view>
+    <view class="form-group">
+      <text class="label">联系电话</text>
+      <input value="{{newPhone}}" bindinput="onNewPhone" placeholder="选填" />
+    </view>
+    <view class="form-group">
+      <text class="label">项目备注</text>
+      <input value="{{newRemark}}" bindinput="onNewRemark" placeholder="选填" />
+    </view>
+    <view class="modal-actions">
+      <button class="btn-cancel" bindtap="hideModal">取消</button>
+      <button class="btn-confirm" bindtap="createProject">创建</button>
+    </view>
+  </view>
+</view>

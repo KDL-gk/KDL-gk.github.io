@@ -1,0 +1,206 @@
+<view class="page">
+  <!-- Tab Bar -->
+  <scroll-view scroll-x class="tab-bar">
+    <view class="tab {{currentTab===index?'active':''}}" wx:for="{{tabs}}" wx:key="index" data-idx="{{index}}" bindtap="switchTab">
+      <text>{{item.icon}} {{item.name}}</text>
+    </view>
+  </scroll-view>
+
+  <!-- Tab: 学校总览 -->
+  <view class="tab-content" wx:if="{{currentTab===0}}">
+    <view class="section">
+      <text class="section-title">📍 项目基本信息</text>
+      <view class="form-group"><text class="label">项目名称</text><input value="{{form.projectName}}" data-field="projectName" bindinput="onInput" placeholder="XXXX学校——工勘" /></view>
+      <view class="form-group"><text class="label">勘测人</text><input value="{{form.surveyor}}" data-field="surveyor" bindinput="onInput" placeholder="XXX" /></view>
+      <view class="form-row">
+        <view class="form-group half"><text class="label">全校总人数</text><input value="{{form.totalPeople}}" data-field="totalPeople" bindinput="onInput" placeholder="3200人" /></view>
+        <view class="form-group half"><text class="label">职教工人数</text><input type="number" value="{{form.staffCount}}" data-field="staffCount" bindinput="onInput" placeholder="200" /></view>
+      </view>
+      <view class="form-row">
+        <view class="form-group half"><text class="label">学生总人数</text><input type="number" value="{{form.studentCount}}" data-field="studentCount" bindinput="onInput" placeholder="3000" /></view>
+        <view class="form-group half"><text class="label">住宿生人数</text><input value="{{form.boarderCount}}" data-field="boarderCount" bindinput="onInput" placeholder="3000人" /></view>
+      </view>
+      <view class="form-row">
+        <view class="form-group half"><text class="label">班级数量</text><input type="number" value="{{form.classCount}}" data-field="classCount" bindinput="onInput" placeholder="请输入" /></view>
+        <view class="form-group half"><text class="label">校门</text><input value="{{form.mainGate}}" data-field="mainGate" bindinput="onInput" placeholder="北门" /></view>
+      </view>
+    </view>
+    <view class="section">
+      <text class="section-title">📝 备注</text>
+      <textarea value="{{form.notes}}" data-field="notes" bindinput="onInput" placeholder="输入备注信息..." class="textarea" />
+    </view>
+  </view>
+
+  <!-- Tab: 人员轨迹 -->
+  <view class="tab-content" wx:if="{{currentTab===1}}">
+    <view class="section">
+      <text class="section-title">👣 人员轨迹摄像机 ({{trackList.length}}台)</text>
+      <view class="card" wx:for="{{trackList}}" wx:key="index">
+        <view class="card-header">
+          <text class="card-num">#{{index+1}}</text>
+          <text class="del-btn" data-idx="{{index}}" data-list="trackList" bindtap="removeItem">✕</text>
+        </view>
+        <view class="form-group"><text class="label">位置</text>
+          <picker range="{{locationOptions}}" value="{{item.locationIdx}}" data-idx="{{index}}" data-list="trackList" data-field="location" bindchange="onPickerChange"><view class="picker">{{item.location||'请选择'}}</view></picker>
+        </view>
+        <view class="form-row">
+          <view class="form-group half"><text class="label">优先级</text>
+            <picker range="{{priorityOptions}}" value="{{item.priorityIdx}}" data-idx="{{index}}" data-list="trackList" data-field="priority" bindchange="onPickerChange"><view class="picker">{{item.priority||'P0'}}</view></picker>
+          </view>
+          <view class="form-group half"><text class="label">类型</text>
+            <picker range="{{camTypeOptions}}" value="{{item.typeIdx}}" data-idx="{{index}}" data-list="trackList" data-field="camType" bindchange="onPickerChange"><view class="picker">{{item.camType||'枪机'}}</view></picker>
+          </view>
+        </view>
+        <view class="form-row">
+          <view class="form-group half"><text class="label">焦距</text>
+            <picker range="{{focalOptions}}" value="{{item.focalIdx}}" data-idx="{{index}}" data-list="trackList" data-field="focal" bindchange="onPickerChange"><view class="picker">{{item.focal||'6MM'}}</view></picker>
+          </view>
+          <view class="form-group half"><text class="label">方案一</text>
+            <picker range="{{scheme1Options}}" value="{{item.scheme1Idx}}" data-idx="{{index}}" data-list="trackList" data-field="scheme1" bindchange="onPickerChange"><view class="picker">{{item.scheme1||'请选择'}}</view></picker>
+          </view>
+        </view>
+        <view class="form-group"><text class="label">备注</text><input value="{{item.note}}" data-idx="{{index}}" data-list="trackList" data-field="note" bindinput="onListInput" placeholder="备注" /></view>
+      </view>
+      <button class="btn-add" bindtap="addTrack">＋ 添加摄像机</button>
+    </view>
+  </view>
+
+  <!-- Tab: 事件预警 -->
+  <view class="tab-content" wx:if="{{currentTab===2}}">
+    <view class="section">
+      <text class="section-title">🚨 事件预警摄像机 ({{alarmList.length}}台)</text>
+      <view class="card" wx:for="{{alarmList}}" wx:key="index">
+        <view class="card-header">
+          <text class="card-num">#{{index+1}}</text>
+          <text class="del-btn" data-idx="{{index}}" data-list="alarmList" bindtap="removeItem">✕</text>
+        </view>
+        <view class="form-group"><text class="label">位置</text>
+          <picker range="{{alarmLocationOptions}}" value="{{item.locationIdx}}" data-idx="{{index}}" data-list="alarmList" data-field="location" bindchange="onPickerChange"><view class="picker">{{item.location||'请选择'}}</view></picker>
+        </view>
+        <view class="form-group"><text class="label">安装位置</text><input value="{{item.installPos}}" data-idx="{{index}}" data-list="alarmList" data-field="installPos" bindinput="onListInput" placeholder="请输入安装位置" /></view>
+        <view class="form-row">
+          <view class="form-group half"><text class="label">优先级</text>
+            <picker range="{{priorityOptions}}" value="{{item.priorityIdx}}" data-idx="{{index}}" data-list="alarmList" data-field="priority" bindchange="onPickerChange"><view class="picker">{{item.priority||'P0'}}</view></picker>
+          </view>
+          <view class="form-group half"><text class="label">类型</text>
+            <picker range="{{camTypeOptions}}" value="{{item.typeIdx}}" data-idx="{{index}}" data-list="alarmList" data-field="camType" bindchange="onPickerChange"><view class="picker">{{item.camType||'枪机'}}</view></picker>
+          </view>
+        </view>
+        <view class="form-group"><text class="label">备注</text><input value="{{item.note}}" data-idx="{{index}}" data-list="alarmList" data-field="note" bindinput="onListInput" placeholder="备注" /></view>
+      </view>
+      <button class="btn-add" bindtap="addAlarm">＋ 添加事件预警</button>
+    </view>
+  </view>
+
+  <!-- Tab: 出入口 -->
+  <view class="tab-content" wx:if="{{currentTab===3}}">
+    <view class="section">
+      <text class="section-title">🚪 出入口配置 ({{entranceList.length}}个)</text>
+      <view class="card" wx:for="{{entranceList}}" wx:key="index">
+        <view class="card-header">
+          <text class="card-num" style="color:#d97706;">{{item.gate||'北门'}}</text>
+          <text class="del-btn" data-idx="{{index}}" data-list="entranceList" bindtap="removeItem">✕</text>
+        </view>
+        <view class="form-group"><text class="label">校门</text>
+          <picker range="{{gateOptions}}" value="{{item.gateIdx}}" data-idx="{{index}}" data-list="entranceList" data-field="gate" bindchange="onPickerChange"><view class="picker">{{item.gate||'北门'}}</view></picker>
+        </view>
+        <view class="form-row">
+          <view class="form-group half"><text class="label">人脸面板数量</text><input value="{{item.facePanel}}" data-idx="{{index}}" data-list="entranceList" data-field="facePanel" bindinput="onListInput" placeholder="请输入" /></view>
+          <view class="form-group half"><text class="label">宽度</text><input value="{{item.width}}" data-idx="{{index}}" data-list="entranceList" data-field="width" bindinput="onListInput" placeholder="如6.5m" /></view>
+        </view>
+        <view class="form-row">
+          <view class="form-group half"><text class="label">通道数</text><input value="{{item.channels}}" data-idx="{{index}}" data-list="entranceList" data-field="channels" bindinput="onListInput" placeholder="如4通道" /></view>
+          <view class="form-group half"><text class="label">认证方式</text>
+            <picker range="{{authOptions}}" value="{{item.authIdx}}" data-idx="{{index}}" data-list="entranceList" data-field="auth" bindchange="onPickerChange"><view class="picker">{{item.auth||'人脸'}}</view></picker>
+          </view>
+        </view>
+        <view class="form-group"><text class="label">取电方式</text><input value="{{item.power}}" data-idx="{{index}}" data-list="entranceList" data-field="power" bindinput="onListInput" placeholder="如保安室取电网" /></view>
+      </view>
+      <button class="btn-add" bindtap="addEntrance">＋ 添加出入口</button>
+    </view>
+  </view>
+
+  <!-- Tab: 宿管 -->
+  <view class="tab-content" wx:if="{{currentTab===4}}">
+    <view class="section">
+      <view class="dorm-banner">🏠 宿舍无感考勤现场工勘</view>
+      <view class="card" wx:for="{{dormList}}" wx:key="index">
+        <view class="card-header">
+          <text class="card-num" style="color:#2563eb;">宿舍{{index+1}}</text>
+          <text class="del-btn" data-idx="{{index}}" data-list="dormList" bindtap="removeItem">✕</text>
+        </view>
+        <view class="form-row">
+          <view class="form-group half"><text class="label">出入口数量</text><input value="{{item.exits}}" data-idx="{{index}}" data-list="dormList" data-field="exits" bindinput="onListInput" placeholder="请输入" /></view>
+          <view class="form-group half"><text class="label">宿管室数量</text><input value="{{item.offices}}" data-idx="{{index}}" data-list="dormList" data-field="offices" bindinput="onListInput" placeholder="请输入" /></view>
+        </view>
+        <view class="form-row">
+          <view class="form-group half"><text class="label">通道宽度</text><input value="{{item.channelWidth}}" data-idx="{{index}}" data-list="dormList" data-field="channelWidth" bindinput="onListInput" placeholder="如6.5m" /></view>
+          <view class="form-group half"><text class="label">建议摄像机数量</text><input value="{{item.camCount}}" data-idx="{{index}}" data-list="dormList" data-field="camCount" bindinput="onListInput" placeholder="如8个" /></view>
+        </view>
+        <view class="form-group"><text class="label">灯光情况</text>
+          <picker range="{{lightOptions}}" value="{{item.lightIdx}}" data-idx="{{index}}" data-list="dormList" data-field="light" bindchange="onPickerChange"><view class="picker">{{item.light||'请选择'}}</view></picker>
+        </view>
+      </view>
+      <button class="btn-add" bindtap="addDorm">＋ 添加宿舍</button>
+    </view>
+  </view>
+
+  <!-- Tab: 监控增加 -->
+  <view class="tab-content" wx:if="{{currentTab===5}}">
+    <view class="section">
+      <text class="section-title">➕ 监控增加 ({{monitorList.length}}个)</text>
+      <view class="card" wx:for="{{monitorList}}" wx:key="index">
+        <view class="card-header">
+          <text class="card-num">监控点 #{{index+1}}</text>
+          <text class="del-btn" data-idx="{{index}}" data-list="monitorList" bindtap="removeItem">✕</text>
+        </view>
+        <view class="form-group"><text class="label">安装位置</text><input value="{{item.position}}" data-idx="{{index}}" data-list="monitorList" data-field="position" bindinput="onListInput" placeholder="如：操场西侧" /></view>
+        <view class="form-row">
+          <view class="form-group half"><text class="label">类型</text>
+            <picker range="{{camTypeOptions}}" value="{{item.typeIdx}}" data-idx="{{index}}" data-list="monitorList" data-field="camType" bindchange="onPickerChange"><view class="picker">{{item.camType||'枪机'}}</view></picker>
+          </view>
+          <view class="form-group half"><text class="label">数量</text><input type="number" value="{{item.count}}" data-idx="{{index}}" data-list="monitorList" data-field="count" bindinput="onListInput" placeholder="0" /></view>
+        </view>
+        <view class="form-group"><text class="label">用途说明</text><input value="{{item.usage}}" data-idx="{{index}}" data-list="monitorList" data-field="usage" bindinput="onListInput" placeholder="补充说明" /></view>
+      </view>
+      <button class="btn-add" bindtap="addMonitor">＋ 添加监控点</button>
+    </view>
+  </view>
+
+  <!-- Tab: 实施费用参考 -->
+  <view class="tab-content" wx:if="{{currentTab===6}}">
+    <view class="section">
+      <text class="section-title">🔥 实施费用参考</text>
+      <view class="cost-note">围绕安防"1+5+N"方案，以"终端设备+网络传输+辅配件"三大模块展开。</view>
+      <view class="card" wx:for="{{costList}}" wx:key="index">
+        <view class="card-header">
+          <text class="card-num">#{{index+1}} {{item.name}}</text>
+          <text class="del-btn" data-idx="{{index}}" data-list="costList" bindtap="removeItem">✕</text>
+        </view>
+        <view class="form-group"><text class="label">名称</text><input value="{{item.name}}" data-idx="{{index}}" data-list="costList" data-field="name" bindinput="onListInput" placeholder="设备名称" /></view>
+        <view class="form-row">
+          <view class="form-group half"><text class="label">数量</text><input type="number" value="{{item.qty}}" data-idx="{{index}}" data-list="costList" data-field="qty" bindinput="onListInput" placeholder="0" /></view>
+          <view class="form-group half"><text class="label">含税价格</text><input type="digit" value="{{item.price}}" data-idx="{{index}}" data-list="costList" data-field="price" bindinput="onListInput" placeholder="0" /></view>
+        </view>
+        <view class="form-row">
+          <view class="form-group half"><text class="label">施工单价</text><input type="digit" value="{{item.labor}}" data-idx="{{index}}" data-list="costList" data-field="labor" bindinput="onListInput" placeholder="0" /></view>
+          <view class="form-group half"><text class="label">备注</text><input value="{{item.remark}}" data-idx="{{index}}" data-list="costList" data-field="remark" bindinput="onListInput" placeholder="备注" /></view>
+        </view>
+        <view class="cost-summary">
+          <text>预算：¥{{item.subtotal||0}}</text>
+          <text>施工：¥{{item.laborTotal||0}}</text>
+        </view>
+      </view>
+      <button class="btn-add" bindtap="addCost">＋ 添加费用项</button>
+      <view class="cost-grand">
+        <text>设备合计：¥{{costGrandTotal}}</text>
+        <text>施工合计：¥{{costLaborTotal}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Bottom Actions -->
+  <view class="bottom-actions">
+    <button class="btn-save" bindtap="saveData">💾 保存数据</button>
+  </view>
+</view>

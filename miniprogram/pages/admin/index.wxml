@@ -1,0 +1,40 @@
+<view class="container">
+  <view class="stats">
+    <view class="stat-card"><text class="num">{{users.length}}</text><text class="label">总用户数</text></view>
+    <view class="stat-card"><text class="num">{{adminCount}}</text><text class="label">管理员</text></view>
+    <view class="stat-card"><text class="num">{{userCount}}</text><text class="label">实施人员</text></view>
+  </view>
+
+  <view class="section">
+    <text class="section-title">👥 用户列表</text>
+    <view class="user-item" wx:for="{{users}}" wx:key="username">
+      <view class="user-info">
+        <text class="user-name">{{item.username}}</text>
+        <text class="user-realname">{{item.name}}</text>
+      </view>
+      <view class="user-role">
+        <text class="role-badge {{item.role==='admin'?'role-admin':'role-user'}}">{{item.role==='admin'?'管理员':'实施人员'}}</text>
+      </view>
+      <view class="user-actions" wx:if="{{item.username!=='admin' && item.username!==currentUsername}}">
+        <picker range="{{roleOptions}}" value="{{item.role==='admin'?0:1}}" data-username="{{item.username}}" bindchange="changeRole">
+          <text class="action-btn">切换角色</text>
+        </picker>
+        <text class="action-btn danger" data-username="{{item.username}}" bindtap="deleteUser">删除</text>
+      </view>
+      <view class="user-actions" wx:elif="{{item.username==='admin'}}">
+        <text class="hint">超级管理员</text>
+      </view>
+      <view class="user-actions" wx:else>
+        <text class="hint">当前账号</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="section">
+    <text class="section-title">➕ 添加人员</text>
+    <view class="form-group"><text class="label">用户名</text><input value="{{addUsername}}" bindinput="onAddUsername" placeholder="登录用户名" /></view>
+    <view class="form-group"><text class="label">姓名</text><input value="{{addName}}" bindinput="onAddName" placeholder="真实姓名" /></view>
+    <view class="form-group"><text class="label">密码</text><input value="{{addPassword}}" bindinput="onAddPassword" placeholder="初始密码" /></view>
+    <button class="btn-primary" style="margin-top:16rpx;" bindtap="addUser">添加用户</button>
+  </view>
+</view>

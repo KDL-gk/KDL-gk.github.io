@@ -1,0 +1,20 @@
+<view class="login-page">
+  <view class="login-card">
+    <view class="login-header">
+      <text class="logo">🏫</text>
+      <text class="title">安防工勘表系统</text>
+      <text class="sub">学校安防勘测管理平台</text>
+    </view>
+    <view class="msg {{msgType}}" wx:if="{{msg}}">{{msg}}</view>
+    <view class="form-group">
+      <text class="label">用户名</text>
+      <input type="text" value="{{username}}" bindinput="onUsernameInput" placeholder="请输入用户名" />
+    </view>
+    <view class="form-group">
+      <text class="label">密码</text>
+      <input type="text" password="{{true}}" value="{{password}}" bindinput="onPasswordInput" placeholder="请输入密码" />
+    </view>
+    <button class="btn-login" bindtap="handleLogin" loading="{{loading}}">登 录</button>
+    <text class="footer">安防工勘表管理系统 v2.0</text>
+  </view>
+</view>

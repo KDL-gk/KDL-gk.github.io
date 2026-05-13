@@ -1,0 +1,4 @@
+{
+  "desc": "安防工勘表小程序",
+  "rules": [{ "action": "allow", "page": "*" }]
+}

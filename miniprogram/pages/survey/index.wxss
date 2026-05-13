@@ -1,0 +1,22 @@
+.page { padding-bottom: 140rpx; }
+.tab-bar { white-space: nowrap; background: #fff; border-bottom: 2rpx solid #e5e7eb; padding: 0 16rpx; }
+.tab { display: inline-block; padding: 20rpx 24rpx; font-size: 26rpx; color: #666; border-bottom: 4rpx solid transparent; }
+.tab.active { color: #2563eb; border-bottom-color: #2563eb; font-weight: 600; }
+.tab-content { padding: 20rpx 24rpx; }
+.form-row { display: flex; gap: 16rpx; }
+.form-group.half { flex: 1; }
+.textarea { width: 100%; min-height: 160rpx; border: 2rpx solid #d1d5db; border-radius: 12rpx; padding: 16rpx 20rpx; font-size: 28rpx; box-sizing: border-box; }
+.card { background: #f9fafb; border: 2rpx solid #e5e7eb; border-radius: 16rpx; padding: 24rpx; margin-bottom: 20rpx; }
+.card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16rpx; }
+.card-num { font-weight: 600; color: #374151; font-size: 28rpx; }
+.del-btn { color: #ef4444; font-size: 32rpx; padding: 8rpx 16rpx; }
+.btn-add { width: 100%; padding: 24rpx; border: 4rpx dashed #93c5fd; border-radius: 16rpx; text-align: center; color: #2563eb; font-size: 28rpx; font-weight: 500; background: transparent; margin-top: 16rpx; line-height: 1.5; }
+.picker { border: 2rpx solid #d1d5db; border-radius: 12rpx; padding: 16rpx 20rpx; font-size: 28rpx; color: #333; background: #fff; }
+.dorm-banner { background: linear-gradient(135deg, #fef3c7, #fde68a); border-left: 6rpx solid #f59e0b; border-radius: 16rpx; padding: 20rpx 28rpx; font-size: 30rpx; font-weight: 600; color: #374151; margin-bottom: 24rpx; }
+.cost-note { background: #fffbeb; border: 2rpx solid #fde68a; border-radius: 12rpx; padding: 16rpx 24rpx; font-size: 24rpx; color: #92400e; margin-bottom: 20rpx; }
+.cost-summary { display: flex; justify-content: space-between; margin-top: 12rpx; font-size: 24rpx; color: #2563eb; font-weight: 500; }
+.cost-grand { display: flex; justify-content: space-between; margin-top: 24rpx; padding: 20rpx 24rpx; background: #eff6ff; border-radius: 12rpx; font-size: 28rpx; font-weight: 600; }
+.cost-grand text:first-child { color: #2563eb; }
+.cost-grand text:last-child { color: #ef4444; }
+.bottom-actions { position: fixed; bottom: 0; left: 0; right: 0; padding: 20rpx 32rpx; background: #fff; box-shadow: 0 -4rpx 12rpx rgba(0,0,0,0.06); z-index: 100; }
+.btn-save { width: 100%; padding: 24rpx; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; border: none; border-radius: 16rpx; font-size: 32rpx; font-weight: 600; text-align: center; line-height: 1.5; }
