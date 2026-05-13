@@ -15,15 +15,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft Ya
 .login-header h1 { font-size: 22px; color: #1e3a8a; }
 .login-header p { font-size: 13px; color: #6b7280; margin-top: 6px; }
 
-.tab-switch { display: flex; background: #f3f4f6; border-radius: 8px; padding: 4px; margin-bottom: 24px; }
-.tab-switch .tab-btn { flex: 1; padding: 10px; text-align: center; border: none; background: none; border-radius: 6px; cursor: pointer; font-size: 14px; color: #6b7280; transition: all 0.2s; }
-.tab-switch .tab-btn.active { background: #fff; color: #2563eb; font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-
-.form-group { margin-bottom: 16px; }
-.form-group label { display: block; font-size: 13px; color: #374151; margin-bottom: 6px; font-weight: 500; }
-.form-group input { width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; outline: none; transition: all 0.2s; }
-.form-group input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
-
 .btn-submit { width: 100%; padding: 12px; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; margin-top: 8px; }
 .btn-submit:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,235,0.4); }
 .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
@@ -32,8 +23,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft Ya
 .msg.error { display: block; background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; }
 .msg.success { display: block; background: #f0fdf4; color: #16a34a; border: 1px solid #86efac; }
 
-.form-panel { display: none; }
-.form-panel.active { display: block; }
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 13px; color: #374151; margin-bottom: 6px; font-weight: 500; }
+.form-group input { width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; outline: none; transition: all 0.2s; }
+.form-group input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
 
 .footer-text { text-align: center; margin-top: 20px; font-size: 12px; color: rgba(255,255,255,0.7); }
 
@@ -52,64 +45,25 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft Ya
       <p>学校安防勘测管理平台</p>
     </div>
 
-    <div class="tab-switch">
-      <button class="tab-btn active" onclick="switchTab('login')">登录</button>
-      <button class="tab-btn" onclick="switchTab('register')">注册</button>
-    </div>
-
     <div id="msgBox" class="msg"></div>
 
-    <!-- Login -->
-    <div class="form-panel active" id="panel-login">
-      <form onsubmit="handleLogin(event)">
-        <div class="form-group">
-          <label>用户名</label>
-          <input type="text" id="loginUser" placeholder="请输入用户名" required>
-        </div>
-        <div class="form-group">
-          <label>密码</label>
-          <input type="password" id="loginPass" placeholder="请输入密码" required>
-        </div>
-        <button type="submit" class="btn-submit" id="loginBtn">登 录</button>
-      </form>
-    </div>
-
-    <!-- Register -->
-    <div class="form-panel" id="panel-register">
-      <form onsubmit="handleRegister(event)">
-        <div class="form-group">
-          <label>用户名</label>
-          <input type="text" id="regUser" placeholder="请输入用户名" required minlength="3">
-        </div>
-        <div class="form-group">
-          <label>姓名</label>
-          <input type="text" id="regName" placeholder="请输入真实姓名" required>
-        </div>
-        <div class="form-group">
-          <label>密码</label>
-          <input type="password" id="regPass" placeholder="请输入密码（至少6位）" required minlength="6">
-        </div>
-        <div class="form-group">
-          <label>确认密码</label>
-          <input type="password" id="regPass2" placeholder="再次输入密码" required>
-        </div>
-        <button type="submit" class="btn-submit" id="regBtn">注 册</button>
-      </form>
-    </div>
+    <form onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label>用户名</label>
+        <input type="text" id="loginUser" placeholder="请输入用户名" required>
+      </div>
+      <div class="form-group">
+        <label>密码</label>
+        <input type="password" id="loginPass" placeholder="请输入密码" required>
+      </div>
+      <button type="submit" class="btn-submit" id="loginBtn">登 录</button>
+    </form>
   </div>
   <div class="footer-text">安防工勘表管理系统 v2.0</div>
 </div>
 
 <script src="api.js"></script>
 <script>
-function switchTab(tab) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('panel-' + tab).classList.add('active');
-  event.target.classList.add('active');
-  hideMsg();
-}
-
 function showMsg(text, type) {
   const el = document.getElementById('msgBox');
   el.textContent = text;
@@ -127,24 +81,6 @@ async function handleLogin(e) {
     await API.login(username, password);
     showMsg('登录成功，正在跳转...', 'success');
     setTimeout(() => window.location.href = 'projects.html', 600);
-  } catch(err) { showMsg(err.message, 'error'); }
-}
-
-async function handleRegister(e) {
-  e.preventDefault();
-  hideMsg();
-  const username = document.getElementById('regUser').value.trim();
-  const name = document.getElementById('regName').value.trim();
-  const pass = document.getElementById('regPass').value;
-  const pass2 = document.getElementById('regPass2').value;
-  if (!username || !name || !pass) { showMsg('请填写所有字段', 'error'); return; }
-  if (username.length < 3) { showMsg('用户名至少3个字符', 'error'); return; }
-  if (pass.length < 6) { showMsg('密码至少6位', 'error'); return; }
-  if (pass !== pass2) { showMsg('两次密码不一致', 'error'); return; }
-  try {
-    await API.register(username, name, pass);
-    showMsg('注册成功！请登录', 'success');
-    setTimeout(() => switchTab('login'), 800);
   } catch(err) { showMsg(err.message, 'error'); }
 }
 
