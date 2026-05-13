@@ -113,6 +113,21 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft Ya
 .track-delete-btn:hover { background: #fef2f2; border-radius: 4px; }
 .track-add-btn { border: 2px dashed #93c5fd; border-radius: 10px; padding: 20px; text-align: center; cursor: pointer; color: #2563eb; font-size: 14px; font-weight: 500; margin-top: 16px; transition: all 0.2s; }
 .track-add-btn:hover { background: #eff6ff; border-color: #2563eb; }
+
+/* Entrance card redesign */
+.entrance-card { background: #fff; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); display: flex; overflow: hidden; }
+.entrance-card-bar { width: 5px; background: #22c55e; flex-shrink: 0; }
+.entrance-card-body { flex: 1; padding: 20px 24px; }
+.entrance-card-header { display: flex; align-items: center; gap: 6px; margin-bottom: 16px; }
+.entrance-icon { font-size: 18px; }
+.entrance-fields { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 14px 20px; margin-bottom: 14px; }
+.ef-group { display: flex; flex-direction: column; }
+.ef-group label { font-size: 12px; color: #6b7280; margin-bottom: 3px; }
+.ef-group input, .ef-group select { padding: 6px 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px; outline: none; }
+.ef-group input:focus, .ef-group select:focus { border-color: #2563eb; }
+.entrance-photo-section { margin-top: 16px; padding-top: 16px; border-top: 1px solid #f3f4f6; }
+.entrance-photo-title { font-size: 13px; color: #374151; font-weight: 500; margin-bottom: 10px; }
+.entrance-preview { margin-top: 8px; }
 .btn-lg { padding: 10px 32px; font-size: 15px; border-radius: 8px; }
 .btn-export { background: #10b981; color: #fff; border: none; }
 .btn-export:hover { background: #059669; }
@@ -375,52 +390,50 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft Ya
 
   <!-- ========== 出入口 ========== -->
   <div class="tab-content" id="tab-entrance">
-    <div class="section">
-      <div class="section-title">🚪 出入口详细配置</div>
-      <div id="entranceDetailList">
-        <div class="dynamic-item">
-          <div class="item-header">
-            <span class="item-title">出入口 #1</span>
-            <button class="btn btn-danger" onclick="removeItem(this)">删除</button>
+    <div id="entranceCardList">
+      <div class="entrance-card">
+        <div class="entrance-card-bar"></div>
+        <div class="entrance-card-body">
+          <div class="entrance-card-header">
+            <span class="entrance-icon">🚪</span>
+            <select class="entrance-gate-name" style="font-size:16px;font-weight:600;color:#d97706;border:none;outline:none;background:transparent;cursor:pointer;">
+              <option>北门</option><option>南门</option><option>东门</option><option>西门</option><option>侧门</option><option>后门</option>
+            </select>
+            <button class="track-delete-btn" onclick="removeEntranceCard(this)" title="删除" style="margin-left:auto">✕</button>
           </div>
-          <div class="form-grid">
-            <div class="form-group">
-              <label>校门名称</label>
-              <input type="text" placeholder="如：北门">
+          <div class="entrance-fields">
+            <div class="ef-group"><label>人脸面板数量</label><input type="text" placeholder="请输入"></div>
+            <div class="ef-group"><label>宽度</label><input type="text" placeholder="如6.5m"></div>
+            <div class="ef-group"><label>通道数</label><input type="text" placeholder="如4通道"></div>
+            <div class="ef-group"><label>深度</label><input type="text" placeholder="如2m"></div>
+            <div class="ef-group"><label>安装地面是否水平</label><select><option>是</option><option>否</option></select></div>
+            <div class="ef-group"><label>地板材料</label><input type="text" placeholder="如水泥地板"></div>
+          </div>
+          <div class="entrance-fields">
+            <div class="ef-group"><label>取电方式</label><input type="text" placeholder="如保安室取电网"></div>
+            <div class="ef-group"><label>冬季温度</label><input type="text" placeholder="如不低于-20℃"></div>
+            <div class="ef-group"><label>海边环境</label><select><option>否</option><option>是</option></select></div>
+            <div class="ef-group"><label>认证方式</label><select><option>人脸</option><option>刷卡</option><option>人脸+刷卡</option><option>二维码</option></select></div>
+            <div class="ef-group"><label>是否有旧闸机</label><input type="text" placeholder="如新增/利旧"></div>
+            <div class="ef-group"><label>是否通行电动车</label><select><option>否</option><option>是</option></select></div>
+          </div>
+          <div class="entrance-fields">
+            <div class="ef-group"><label>通行方式</label><input type="text" placeholder="如混进混出"></div>
+          </div>
+          <div class="entrance-photo-section">
+            <div class="entrance-photo-title">📷 <span class="entrance-photo-label">现场照片</span></div>
+            <div class="upload-area" style="padding:24px;">
+              <input type="file" accept="image/*" multiple onchange="handleEntranceUpload(this)">
+              <div class="icon-upload">📷</div>
+              <div style="color:#2563eb;font-size:13px;">拍摄/上传</div>
             </div>
-            <div class="form-group">
-              <label>闸机数量</label>
-              <div class="suffix"><input type="number" placeholder="0"><span>台</span></div>
-            </div>
-            <div class="form-group">
-              <label>闸机类型</label>
-              <select><option>翼闸</option><option>摆闸</option><option>速通门</option><option>三辊闸</option></select>
-            </div>
-            <div class="form-group">
-              <label>人脸终端数量</label>
-              <div class="suffix"><input type="number" placeholder="0"><span>台</span></div>
-            </div>
-            <div class="form-group">
-              <label>车辆道闸</label>
-              <select><option>无</option><option>有</option></select>
-            </div>
-            <div class="form-group">
-              <label>访客机</label>
-              <select><option>无</option><option>有</option></select>
-            </div>
+            <div class="preview-container entrance-preview"></div>
           </div>
         </div>
       </div>
-      <button class="btn btn-primary btn-add" onclick="addEntranceDetail()">➕ 添加出入口</button>
     </div>
-    <div class="section">
-      <div class="section-title">📸 现场照片</div>
-      <div class="upload-area">
-        <input type="file" accept="image/*" multiple onchange="handleUpload(this, 'entrancePhotoPreview', 10)">
-        <div class="icon-upload">📷</div>
-        <div>拍摄/上传图片</div>
-      </div>
-      <div class="preview-container" id="entrancePhotoPreview"></div>
+    <div class="track-add-btn" onclick="addEntranceCard()">
+      <span>＋ 添加出入口</span>
     </div>
   </div>
 
@@ -793,22 +806,70 @@ function filterAlarmRows() {
   });
 }
 
-function addEntranceDetail() {
-  const list = document.getElementById('entranceDetailList');
-  const n = list.children.length + 1;
-  const item = document.createElement('div');
-  item.className = 'dynamic-item';
-  item.innerHTML = `
-    <div class="item-header"><span class="item-title">出入口 #${n}</span><button class="btn btn-danger" onclick="removeItem(this)">删除</button></div>
-    <div class="form-grid">
-      <div class="form-group"><label>校门名称</label><input type="text" placeholder="如：南门"></div>
-      <div class="form-group"><label>闸机数量</label><div class="suffix"><input type="number" placeholder="0"><span>台</span></div></div>
-      <div class="form-group"><label>闸机类型</label><select><option>翼闸</option><option>摆闸</option><option>速通门</option><option>三辊闸</option></select></div>
-      <div class="form-group"><label>人脸终端数量</label><div class="suffix"><input type="number" placeholder="0"><span>台</span></div></div>
-      <div class="form-group"><label>车辆道闸</label><select><option>无</option><option>有</option></select></div>
-      <div class="form-group"><label>访客机</label><select><option>无</option><option>有</option></select></div>
+function addEntranceCard() {
+  const list = document.getElementById('entranceCardList');
+  const card = document.createElement('div');
+  card.className = 'entrance-card';
+  card.innerHTML = `
+    <div class="entrance-card-bar"></div>
+    <div class="entrance-card-body">
+      <div class="entrance-card-header">
+        <span class="entrance-icon">🚪</span>
+        <select class="entrance-gate-name" style="font-size:16px;font-weight:600;color:#d97706;border:none;outline:none;background:transparent;cursor:pointer;">
+          <option>北门</option><option>南门</option><option>东门</option><option>西门</option><option>侧门</option><option>后门</option>
+        </select>
+        <button class="track-delete-btn" onclick="removeEntranceCard(this)" title="删除" style="margin-left:auto">✕</button>
+      </div>
+      <div class="entrance-fields">
+        <div class="ef-group"><label>人脸面板数量</label><input type="text" placeholder="请输入"></div>
+        <div class="ef-group"><label>宽度</label><input type="text" placeholder="如6.5m"></div>
+        <div class="ef-group"><label>通道数</label><input type="text" placeholder="如4通道"></div>
+        <div class="ef-group"><label>深度</label><input type="text" placeholder="如2m"></div>
+        <div class="ef-group"><label>安装地面是否水平</label><select><option>是</option><option>否</option></select></div>
+        <div class="ef-group"><label>地板材料</label><input type="text" placeholder="如水泥地板"></div>
+      </div>
+      <div class="entrance-fields">
+        <div class="ef-group"><label>取电方式</label><input type="text" placeholder="如保安室取电网"></div>
+        <div class="ef-group"><label>冬季温度</label><input type="text" placeholder="如不低于-20℃"></div>
+        <div class="ef-group"><label>海边环境</label><select><option>否</option><option>是</option></select></div>
+        <div class="ef-group"><label>认证方式</label><select><option>人脸</option><option>刷卡</option><option>人脸+刷卡</option><option>二维码</option></select></div>
+        <div class="ef-group"><label>是否有旧闸机</label><input type="text" placeholder="如新增/利旧"></div>
+        <div class="ef-group"><label>是否通行电动车</label><select><option>否</option><option>是</option></select></div>
+      </div>
+      <div class="entrance-fields">
+        <div class="ef-group"><label>通行方式</label><input type="text" placeholder="如混进混出"></div>
+      </div>
+      <div class="entrance-photo-section">
+        <div class="entrance-photo-title">📷 <span class="entrance-photo-label">现场照片</span></div>
+        <div class="upload-area" style="padding:24px;">
+          <input type="file" accept="image/*" multiple onchange="handleEntranceUpload(this)">
+          <div class="icon-upload">📷</div>
+          <div style="color:#2563eb;font-size:13px;">拍摄/上传</div>
+        </div>
+        <div class="preview-container entrance-preview"></div>
+      </div>
     </div>`;
-  list.appendChild(item);
+  list.appendChild(card);
+}
+
+function removeEntranceCard(btn) {
+  btn.closest('.entrance-card').remove();
+}
+
+function handleEntranceUpload(input) {
+  const container = input.closest('.entrance-card-body').querySelector('.entrance-preview');
+  const files = Array.from(input.files).slice(0, 10 - container.children.length);
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const div = document.createElement('div');
+      div.className = 'preview-item';
+      div.innerHTML = `<img src="${e.target.result}" onclick="openLightbox(this.src)"><button class="remove" onclick="event.stopPropagation();this.parentElement.remove()">×</button>`;
+      container.appendChild(div);
+    };
+    reader.readAsDataURL(file);
+  });
+  input.value = '';
 }
 
 function addDormDetail() {
@@ -957,6 +1018,21 @@ function collectTrackTable() {
   return rows;
 }
 
+function collectEntranceCards() {
+  const rows = [];
+  document.querySelectorAll('#entranceCardList .entrance-card').forEach(card => {
+    const row = {};
+    row['校门'] = card.querySelector('.entrance-gate-name')?.value || '';
+    card.querySelectorAll('.ef-group').forEach(g => {
+      const label = g.querySelector('label')?.textContent?.trim();
+      const input = g.querySelector('input, select');
+      if (label && input) row[label] = input.value;
+    });
+    rows.push(row);
+  });
+  return rows;
+}
+
 function collectAlarmTable() {
   const rows = [];
   document.querySelectorAll('#alarmTableBody tr').forEach(tr => {
@@ -996,7 +1072,7 @@ function exportToExcel() {
   const dorms = collectDynamicItems('dormOverviewList');
   const tracks = collectTrackTable();
   const alarms = collectAlarmTable();
-  const entranceDetails = collectDynamicItems('entranceDetailList');
+  const entranceDetails = collectEntranceCards();
   const dormDetails = collectDynamicItems('dormDetailList');
   const monitors = collectDynamicItems('monitorList');
   const costs = collectCostTable();
