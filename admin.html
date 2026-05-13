@@ -230,6 +230,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft Ya
   </div>
 </div>
 
+<script src="api.js"></script>
 <script>
 // Auth guard - admin only
 (function() {
@@ -246,15 +247,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft Ya
   } catch(e) { window.location.href = 'index.html'; }
 })();
 
-function getUsers() {
-  const data = localStorage.getItem('_survey_users');
-  if (data) return JSON.parse(data);
-  const defaults = [{ username: 'admin', password: 'admin123', name: '管理员', role: 'admin' }];
-  localStorage.setItem('_survey_users', JSON.stringify(defaults));
-  return defaults;
-}
-function saveUsers(users) { localStorage.setItem('_survey_users', JSON.stringify(users)); }
-
 function showMsg(text, type) {
   const el = document.getElementById('msgBox');
   el.textContent = text;
@@ -262,8 +254,8 @@ function showMsg(text, type) {
   setTimeout(() => el.className = 'msg', 4000);
 }
 
-function renderUsers() {
-  const users = getUsers();
+async function renderUsers() {
+  const users = await API.getUsers();
   const tbody = document.getElementById('userTableBody');
   const currentUser = JSON.parse(localStorage.getItem('user'));
 
@@ -296,21 +288,24 @@ function renderUsers() {
   }).join('');
 }
 
-function changeRole(username, newRole) {
-  const users = getUsers();
-  const user = users.find(u => u.username === username);
-  if (user) { user.role = newRole; saveUsers(users); renderUsers(); showMsg(`已将 ${user.name} 设为${newRole==='admin'?'管理员':'实施人员'}`, 'success'); }
+async function changeRole(username, newRole) {
+  try {
+    await API.changeUserRole(username, newRole);
+    renderUsers();
+    showMsg(`已更改角色`, 'success');
+  } catch(err) { showMsg(err.message, 'error'); }
 }
 
-function deleteUser(username) {
+async function deleteUser(username) {
   if (!confirm('确定删除该用户？')) return;
-  const users = getUsers().filter(u => u.username !== username);
-  saveUsers(users);
-  renderUsers();
-  showMsg('用户已删除', 'success');
+  try {
+    await API.deleteUser(username);
+    renderUsers();
+    showMsg('用户已删除', 'success');
+  } catch(err) { showMsg(err.message, 'error'); }
 }
 
-function addSingleUser() {
+async function addSingleUser() {
   const username = document.getElementById('addUsername').value.trim();
   const name = document.getElementById('addName').value.trim();
   const password = document.getElementById('addPassword').value.trim();
@@ -319,42 +314,31 @@ function addSingleUser() {
   if (!username || !name) { showMsg('请填写用户名和姓名', 'error'); return; }
   if (username.length < 3) { showMsg('用户名至少3个字符', 'error'); return; }
 
-  const users = getUsers();
-  if (users.find(u => u.username === username)) { showMsg('用户名已存在', 'error'); return; }
-
-  users.push({ username, password: password || '123456', name, role });
-  saveUsers(users);
-  renderUsers();
-  document.getElementById('addUsername').value = '';
-  document.getElementById('addName').value = '';
-  showMsg(`已添加用户：${name}（${role==='admin'?'管理员':'实施人员'}）`, 'success');
+  try {
+    await API.addUser({ username, password: password || '123456', name, role });
+    renderUsers();
+    document.getElementById('addUsername').value = '';
+    document.getElementById('addName').value = '';
+    showMsg(`已添加用户：${name}`, 'success');
+  } catch(err) { showMsg(err.message, 'error'); }
 }
 
-function batchAddUsers() {
+async function batchAddUsers() {
   const input = document.getElementById('batchInput').value.trim();
   if (!input) { showMsg('请输入要添加的用户信息', 'error'); return; }
 
   const lines = input.split('\n').map(l => l.trim()).filter(l => l);
-  const users = getUsers();
-  let added = 0, skipped = 0;
-
-  lines.forEach(line => {
+  const batch = lines.map(line => {
     const parts = line.split(/[,，\t]/).map(s => s.trim());
-    const username = parts[0];
-    const name = parts[1] || username;
-    const password = parts[2] || '123456';
-
-    if (!username || username.length < 3) { skipped++; return; }
-    if (users.find(u => u.username === username)) { skipped++; return; }
-
-    users.push({ username, password, name, role: 'user' });
-    added++;
+    return { username: parts[0], name: parts[1] || parts[0], password: parts[2] || '123456' };
   });
 
-  saveUsers(users);
-  renderUsers();
-  document.getElementById('batchInput').value = '';
-  showMsg(`批量添加完成：成功 ${added} 人${skipped > 0 ? '，跳过 ' + skipped + ' 人（重复或格式错误）' : ''}`, added > 0 ? 'success' : 'error');
+  try {
+    const res = await API.batchAddUsers(batch);
+    renderUsers();
+    document.getElementById('batchInput').value = '';
+    showMsg(`批量添加完成：成功 ${res.added} 人`, res.added > 0 ? 'success' : 'error');
+  } catch(err) { showMsg(err.message, 'error'); }
 }
 
 function esc(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }

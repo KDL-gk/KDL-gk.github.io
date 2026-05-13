@@ -100,16 +100,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft Ya
   <div class="footer-text">安防工勘表管理系统 v2.0</div>
 </div>
 
+<script src="api.js"></script>
 <script>
-function getUsers() {
-  const data = localStorage.getItem('_survey_users');
-  if (data) return JSON.parse(data);
-  const defaults = [{ username: 'admin', password: 'admin123', name: '管理员', role: 'admin' }];
-  localStorage.setItem('_survey_users', JSON.stringify(defaults));
-  return defaults;
-}
-function saveUsers(users) { localStorage.setItem('_survey_users', JSON.stringify(users)); }
-
 function switchTab(tab) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
@@ -125,43 +117,35 @@ function showMsg(text, type) {
 }
 function hideMsg() { document.getElementById('msgBox').className = 'msg'; }
 
-function handleLogin(e) {
+async function handleLogin(e) {
   e.preventDefault();
   hideMsg();
   const username = document.getElementById('loginUser').value.trim();
   const password = document.getElementById('loginPass').value;
   if (!username || !password) { showMsg('请输入用户名和密码', 'error'); return; }
-
-  const users = getUsers();
-  const user = users.find(u => u.username === username && u.password === password);
-  if (!user) { showMsg('用户名或密码错误', 'error'); return; }
-
-  showMsg('登录成功，正在跳转...', 'success');
-  localStorage.setItem('token', Date.now().toString());
-  localStorage.setItem('user', JSON.stringify({ username: user.username, name: user.name, role: user.role }));
-  setTimeout(() => window.location.href = 'projects.html', 600);
+  try {
+    await API.login(username, password);
+    showMsg('登录成功，正在跳转...', 'success');
+    setTimeout(() => window.location.href = 'projects.html', 600);
+  } catch(err) { showMsg(err.message, 'error'); }
 }
 
-function handleRegister(e) {
+async function handleRegister(e) {
   e.preventDefault();
   hideMsg();
   const username = document.getElementById('regUser').value.trim();
   const name = document.getElementById('regName').value.trim();
   const pass = document.getElementById('regPass').value;
   const pass2 = document.getElementById('regPass2').value;
-
   if (!username || !name || !pass) { showMsg('请填写所有字段', 'error'); return; }
   if (username.length < 3) { showMsg('用户名至少3个字符', 'error'); return; }
   if (pass.length < 6) { showMsg('密码至少6位', 'error'); return; }
   if (pass !== pass2) { showMsg('两次密码不一致', 'error'); return; }
-
-  const users = getUsers();
-  if (users.find(u => u.username === username)) { showMsg('用户名已存在', 'error'); return; }
-
-  users.push({ username, password: pass, name, role: 'user' });
-  saveUsers(users);
-  showMsg('注册成功！请登录', 'success');
-  setTimeout(() => switchTab('login'), 800);
+  try {
+    await API.register(username, name, pass);
+    showMsg('注册成功！请登录', 'success');
+    setTimeout(() => switchTab('login'), 800);
+  } catch(err) { showMsg(err.message, 'error'); }
 }
 
 if (localStorage.getItem('token')) { window.location.href = 'projects.html'; }

@@ -133,6 +133,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft Ya
   </div>
 </div>
 
+<script src="api.js"></script>
 <script>
 // Auth guard
 (function() {
@@ -155,20 +156,13 @@ function logout() {
   window.location.href = 'index.html';
 }
 
-function getProjects() {
-  return JSON.parse(localStorage.getItem('_survey_projects') || '[]');
-}
-function saveProjects(list) {
-  localStorage.setItem('_survey_projects', JSON.stringify(list));
-}
-
 function showModal() { document.getElementById('modalOverlay').classList.add('active'); document.getElementById('newProjectName').focus(); }
 function hideModal() {
   document.getElementById('modalOverlay').classList.remove('active');
   ['newProjectName','newSchoolName','newSurveyor','newPhone','newRemark'].forEach(id => document.getElementById(id).value = '');
 }
 
-function createProject() {
+async function createProject() {
   const name = document.getElementById('newProjectName').value.trim();
   const school = document.getElementById('newSchoolName').value.trim();
   const surveyor = document.getElementById('newSurveyor').value.trim();
@@ -177,33 +171,27 @@ function createProject() {
 
   if (!name || !school || !surveyor) { alert('请填写项目名称、学校名称和勘测人'); return; }
 
-  const projects = getProjects();
-  const project = {
-    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-    name, school, surveyor, phone, remark,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  };
-  projects.unshift(project);
-  saveProjects(projects);
-  hideModal();
-  renderProjects();
+  try {
+    await API.createProject({ name, school, surveyor, phone, remark });
+    hideModal();
+    renderProjects();
+  } catch(err) { alert(err.message); }
 }
 
-function deleteProject(id) {
+async function deleteProject(id) {
   if (!confirm('确定删除该项目？删除后工勘数据也将清除，不可恢复！')) return;
-  const projects = getProjects().filter(p => p.id !== id);
-  saveProjects(projects);
-  localStorage.removeItem('_survey_data_' + id);
-  renderProjects();
+  try {
+    await API.deleteProject(id);
+    renderProjects();
+  } catch(err) { alert(err.message); }
 }
 
 function enterProject(id) {
   window.location.href = 'app.html?id=' + id;
 }
 
-function renderProjects() {
-  const projects = getProjects();
+async function renderProjects() {
+  const projects = await API.getProjects();
   const container = document.getElementById('projectList');
 
   // Stats

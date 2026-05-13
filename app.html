@@ -800,6 +800,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft Ya
   <button class="btn btn-lg btn-export" onclick="exportToExcel()">📤 导出Excel表格</button>
 </div>
 
+<script src="api.js"></script>
 <script>
 // Get project ID from URL
 const urlParams = new URLSearchParams(window.location.search);
@@ -1265,14 +1266,12 @@ function collectFormData() {
   return data;
 }
 
-function saveData() {
+async function saveData() {
   const data = collectFormData();
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  // Update project timestamp
-  const projects = JSON.parse(localStorage.getItem('_survey_projects') || '[]');
-  const idx = projects.findIndex(p => p.id === PROJECT_ID);
-  if (idx >= 0) { projects[idx].updatedAt = new Date().toISOString(); localStorage.setItem('_survey_projects', JSON.stringify(projects)); }
-  alert('数据已保存！');
+  try {
+    await API.saveSurvey(PROJECT_ID, data);
+    alert('数据已保存！');
+  } catch(err) { alert('保存失败：' + err.message); }
 }
 
 function collectDynamicItems(containerId, fields) {
@@ -1448,19 +1447,18 @@ function exportToExcel() {
 }
 
 // Load saved data on start
-window.addEventListener('DOMContentLoaded', () => {
-  const saved = localStorage.getItem(STORAGE_KEY);
-  if (saved) {
-    try {
-      const data = JSON.parse(saved);
+window.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const data = await API.loadSurvey(PROJECT_ID);
+    if (data && Object.keys(data).length) {
       Object.keys(data).forEach(key => {
         const el = document.getElementById(key);
         if (el) el.value = data[key];
       });
       updateHeader();
       updateSummary();
-    } catch(e) {}
-  }
+    }
+  } catch(e) {}
   if (!document.querySelectorAll('#trackTableBody tr').length) addTrackPoint();
   if (!document.querySelectorAll('#alarmTableBody tr').length) addAlarmPoint();
   document.querySelectorAll('#costBody .cost-qty').forEach(el => calcCostRow(el));
