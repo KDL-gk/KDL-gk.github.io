@@ -26,8 +26,23 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft Ya
 
 /* Summary bar */
 .summary-bar { display: flex; flex-wrap: wrap; gap: 8px; padding: 16px 24px; justify-content: center; }
-.summary-tag { background: #fff; border: 1px solid #d1d5db; border-radius: 16px; padding: 4px 14px; font-size: 13px; color: #333; }
+.summary-tag { background: #fff; border: 1px solid #d1d5db; border-radius: 20px; padding: 6px 18px; font-size: 13px; color: #333; }
 .summary-tag .val { color: #2563eb; font-weight: 600; }
+
+/* Overview redesign */
+.ov-title { font-size: 17px; font-weight: 600; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+.ov-icon { font-size: 16px; }
+.ov-red + span, .ov-red ~ b { color: #dc2626; }
+.ov-title { color: #2563eb; }
+.ov-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px 20px; margin-bottom: 16px; }
+.ov-field { display: flex; flex-direction: column; }
+.ov-field label { font-size: 12px; color: #6b7280; margin-bottom: 5px; }
+.ov-field input, .ov-field select { padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 20px; font-size: 14px; outline: none; background: #fff; transition: border 0.2s; }
+.ov-field input:focus, .ov-field select:focus { border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37,99,235,0.1); }
+.ov-suffix { display: flex; align-items: center; border: 1px solid #d1d5db; border-radius: 20px; padding: 0 14px; background: #fff; transition: border 0.2s; }
+.ov-suffix:focus-within { border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37,99,235,0.1); }
+.ov-suffix input { border: none; outline: none; padding: 10px 0; font-size: 14px; flex: 1; min-width: 0; background: transparent; }
+.ov-suffix span { color: #6b7280; font-size: 13px; white-space: nowrap; margin-left: 4px; }
 
 /* Content */
 .content { max-width: 1200px; margin: 0 auto; padding: 16px 24px 40px; }
@@ -180,130 +195,67 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft Ya
   <!-- ========== 学校总览 ========== -->
   <div class="tab-content active" id="tab-overview">
     <div class="section">
-      <div class="section-title">📍 项目基本信息</div>
-      <div class="form-grid">
-        <div class="form-group">
-          <label>项目名称</label>
-          <input type="text" id="projectName" placeholder="XXXX学校——工勘" oninput="updateHeader()">
-        </div>
-        <div class="form-group">
-          <label>勘测人</label>
-          <input type="text" id="surveyor" placeholder="请输入勘测人" oninput="updateHeader()">
-        </div>
-        <div class="form-group">
-          <label>全校总人数</label>
-          <div class="suffix"><input type="number" id="totalPeople" placeholder="请输入" oninput="updateSummary()"><span>人</span></div>
-        </div>
-        <div class="form-group">
-          <label>教职工人数</label>
-          <div class="suffix"><input type="number" id="staffCount" placeholder="请输入" oninput="updateSummary()"><span>人</span></div>
-        </div>
-        <div class="form-group">
-          <label>学生总人数</label>
-          <div class="suffix"><input type="number" id="studentCount" placeholder="请输入" oninput="updateSummary()"><span>人</span></div>
-        </div>
-        <div class="form-group">
-          <label>住宿生人数</label>
-          <div class="suffix"><input type="number" id="boarderCount" placeholder="请输入"><span>人</span></div>
-        </div>
-        <div class="form-group">
-          <label>班级数量</label>
-          <div class="suffix"><input type="number" id="classCount" placeholder="请输入"><span>个</span></div>
-        </div>
-        <div class="form-group">
-          <label>校门</label>
-          <input type="text" id="mainGate" placeholder="如：北门">
-        </div>
+      <div class="ov-title"><span class="ov-icon ov-red">📍</span> 项目基本信息</div>
+      <div class="ov-grid">
+        <div class="ov-field"><label>项目名称</label><input type="text" id="projectName" placeholder="XXXX学校——工勘" oninput="updateHeader()"></div>
+        <div class="ov-field"><label>勘测人</label><input type="text" id="surveyor" placeholder="XXX" oninput="updateHeader()"></div>
+        <div class="ov-field"><label>全校总人数</label><input type="text" id="totalPeople" placeholder="3200人" oninput="updateSummary()"></div>
+        <div class="ov-field"><label>职教工人数</label><div class="ov-suffix"><input type="number" id="staffCount" placeholder="200" oninput="updateSummary()"><span>人</span></div></div>
+        <div class="ov-field"><label>学生总人数</label><div class="ov-suffix"><input type="number" id="studentCount" placeholder="3000" oninput="updateSummary()"><span>人</span></div></div>
+      </div>
+      <div class="ov-grid">
+        <div class="ov-field"><label>住宿生人数</label><input type="text" id="boarderCount" placeholder="3000人"></div>
+        <div class="ov-field"><label>班级数量</label><div class="ov-suffix"><input type="number" id="classCount" placeholder="请输入"><span>个</span></div></div>
+        <div class="ov-field"><label>校门</label><input type="text" id="mainGate" placeholder="北门"></div>
       </div>
     </div>
 
     <div class="section">
-      <div class="section-title">🚪 出入口总览</div>
+      <div class="ov-title"><span class="ov-icon ov-orange">🚪</span> 出入口总览</div>
       <div id="entranceOverviewList">
-        <div class="dynamic-item">
-          <div class="form-grid">
-            <div class="form-group">
-              <label>校门</label>
-              <input type="text" placeholder="如：北门">
-            </div>
-            <div class="form-group">
-              <label>是否有旧闸机</label>
-              <input type="text" placeholder="如北门新增，南门利旧">
-            </div>
-            <div class="form-group">
-              <label>是否通行电动车</label>
-              <select><option>否</option><option>是</option></select>
-            </div>
-            <div class="form-group">
-              <label>通行方式</label>
-              <input type="text" placeholder="如北门混进混出，南门混进清...">
-            </div>
-            <div class="form-group">
-              <label>认证方式</label>
-              <select><option>人脸</option><option>刷卡</option><option>人脸+刷卡</option><option>二维码</option></select>
-            </div>
-          </div>
+        <div class="ov-grid">
+          <div class="ov-field"><label>校门</label><input type="text" placeholder="北门"></div>
+          <div class="ov-field"><label>是否有旧闸机</label><input type="text" placeholder="如北门新增，南门利旧"></div>
+          <div class="ov-field"><label>是否通行电动车</label><select><option>否</option><option>是</option></select></div>
+          <div class="ov-field"><label>通行方式</label><input type="text" placeholder="如北门混进混出，南门混进清..."></div>
+          <div class="ov-field"><label>认证方式</label><select><option>人脸</option><option>刷卡</option><option>人脸+刷卡</option><option>二维码</option></select></div>
         </div>
       </div>
-      <button class="btn btn-primary btn-add" onclick="addEntrance()">➕ 添加出入口</button>
+      <div class="track-add-btn" onclick="addEntrance()" style="margin-top:12px;">
+        <span>＋ 添加出入口</span>
+      </div>
     </div>
 
     <div class="section">
-      <div class="section-title">🏠 宿管总览</div>
+      <div class="ov-title"><span class="ov-icon ov-blue">🏠</span> 宿管总览</div>
       <div id="dormOverviewList">
-        <div class="dynamic-item">
-          <div class="form-grid">
-            <div class="form-group">
-              <label>宿舍数量</label>
-              <div class="suffix"><input type="number" placeholder="请输入"><span>栋</span></div>
-            </div>
-            <div class="form-group">
-              <label>总出入口数量</label>
-              <div class="suffix"><input type="number" placeholder="请输入"><span>个</span></div>
-            </div>
-            <div class="form-group">
-              <label>总宿管室数量</label>
-              <div class="suffix"><input type="number" placeholder="请输入"><span>个</span></div>
-            </div>
-            <div class="form-group">
-              <label>总考勤点数量</label>
-              <div class="suffix"><input type="number" placeholder="请输入"><span>个</span></div>
-            </div>
-            <div class="form-group">
-              <label>总摄像机数量</label>
-              <div class="suffix"><input type="number" id="dormCamCount" placeholder="请输入" oninput="updateSummary()"><span>个</span></div>
-            </div>
-            <div class="form-group">
-              <label>灯光情况</label>
-              <input type="text" placeholder="请输入">
-            </div>
-            <div class="form-group">
-              <label>是否有学生不经过通道</label>
-              <select><option>否</option><option>是</option></select>
-            </div>
-            <div class="form-group">
-              <label>宿舍名称</label>
-              <input type="text" placeholder="如：宿舍1">
-            </div>
-          </div>
+        <div class="ov-grid">
+          <div class="ov-field"><label>宿舍数量</label><input type="text" placeholder="0栋"></div>
+          <div class="ov-field"><label>总出入口数量</label><input type="text" placeholder="0个"></div>
+          <div class="ov-field"><label>总宿管室数量</label><input type="text" placeholder="0个"></div>
+          <div class="ov-field"><label>总考勤点数量</label><input type="text" placeholder="0个"></div>
+          <div class="ov-field"><label>总建议摄像机数量</label><input type="text" id="dormCamCount" placeholder="0个" oninput="updateSummary()"></div>
+        </div>
+        <div class="ov-grid">
+          <div class="ov-field"><label>灯光情况</label><input type="text" placeholder="—"></div>
+          <div class="ov-field"><label>是否有学生不经过通道</label><select><option>否</option><option>是</option></select></div>
+          <div class="ov-field"><label>宿舍名称</label><input type="text" placeholder="—"></div>
         </div>
       </div>
     </div>
 
     <div class="section">
-      <div class="section-title">📸 学校门头照、导览图照片</div>
-      <p style="font-size:13px;color:#6b7280;margin-bottom:12px;">📷 点击下方按钮拍摄/上传学校门头照或导览图（最多3张）</p>
+      <div class="ov-title"><span class="ov-icon ov-orange">📸</span> 学校门头照、导览图照片</div>
       <div class="upload-area" id="uploadSchoolPhotos">
-        <input type="file" accept="image/*" multiple onchange="handleUpload(this, 'schoolPhotoPreview', 3)">
+        <input type="file" accept="image/*" multiple onchange="handleUpload(this, 'schoolPhotoPreview', 6)">
         <div class="icon-upload">📷</div>
-        <div>拍摄/上传图片</div>
-        <div class="upload-hint">支持 JPG、PNG 格式</div>
+        <div style="color:#2563eb;font-size:13px;">拍摄/上传</div>
       </div>
       <div class="preview-container" id="schoolPhotoPreview"></div>
     </div>
 
     <div class="section">
-      <div class="section-title">📝 备注</div>
+      <div class="ov-title"><span class="ov-icon ov-gray">📝</span> 备注</div>
       <div class="form-group">
         <textarea id="overviewNotes" placeholder="输入备注信息..."></textarea>
       </div>
@@ -655,7 +607,7 @@ function updateSummary() {
   document.querySelectorAll('.monitor-cam-count').forEach(el => addCam += Number(el.value) || 0);
   document.getElementById('sumAddCam').textContent = addCam;
 
-  const dormCam = Number(document.getElementById('dormCamCount')?.value) || 0;
+  const dormCam = parseInt(document.getElementById('dormCamCount')?.value) || 0;
   document.getElementById('sumDormCam').textContent = dormCam;
 
   document.getElementById('sumTotalCam').textContent = trackCam + alarmCam + addCam + dormCam;
@@ -669,15 +621,15 @@ function removeItem(btn) {
 function addEntrance() {
   const list = document.getElementById('entranceOverviewList');
   const item = document.createElement('div');
-  item.className = 'dynamic-item';
+  item.style.cssText = 'border-top:1px solid #f3f4f6;padding-top:16px;margin-top:12px;position:relative;';
   item.innerHTML = `
-    <div class="item-header"><span class="item-title">出入口</span><button class="btn btn-danger" onclick="removeItem(this)">删除</button></div>
-    <div class="form-grid">
-      <div class="form-group"><label>校门</label><input type="text" placeholder="如：南门"></div>
-      <div class="form-group"><label>是否有旧闸机</label><input type="text" placeholder="如北门新增，南门利旧"></div>
-      <div class="form-group"><label>是否通行电动车</label><select><option>否</option><option>是</option></select></div>
-      <div class="form-group"><label>通行方式</label><input type="text" placeholder="如北门混进混出"></div>
-      <div class="form-group"><label>认证方式</label><select><option>人脸</option><option>刷卡</option><option>人脸+刷卡</option><option>二维码</option></select></div>
+    <button class="track-delete-btn" onclick="this.parentElement.remove()" title="删除" style="position:absolute;top:16px;right:0;">✕</button>
+    <div class="ov-grid">
+      <div class="ov-field"><label>校门</label><input type="text" placeholder="如：南门"></div>
+      <div class="ov-field"><label>是否有旧闸机</label><input type="text" placeholder="如北门新增，南门利旧"></div>
+      <div class="ov-field"><label>是否通行电动车</label><select><option>否</option><option>是</option></select></div>
+      <div class="ov-field"><label>通行方式</label><input type="text" placeholder="如北门混进混出"></div>
+      <div class="ov-field"><label>认证方式</label><select><option>人脸</option><option>刷卡</option><option>人脸+刷卡</option><option>二维码</option></select></div>
     </div>`;
   list.appendChild(item);
 }
